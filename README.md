@@ -7,7 +7,7 @@ GitHub: [vvoosol/poketour](https://github.com/vvoosol/poketour) · 비공개 저
 ## 프로젝트
 
 - `songpa-site/`: 게임 소스, UI 자산, 데이터, Worker API, DB 스키마 및 검사 코드.
-- `POKETOUR_DEVELOPMENT_PROMPTS.md`: 공통 작업 지침과 10단계 개발 프롬프트.
+- `POKETOUR_DEVELOPMENT_PROMPTS.md`: 공통 작업 지침과 5단계 개발 프롬프트.
 - `SONGPA_CODEX_HANDOFF.md`: 이전 구현과 과거 검증 기록.
 - `컨셉 이미지1.png`: UI 시각 참고.
 - `AGENTS.md`: 작업 및 GitHub 동기화 규칙.
