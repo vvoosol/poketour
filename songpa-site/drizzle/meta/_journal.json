@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1791037822203,
+      "tag": "0000_hard_vampiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791105334714,
+      "tag": "0001_thin_nemesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791106499451,
+      "tag": "0002_wet_mach_iv",
+      "breakpoints": true
+    }
+  ]
+}

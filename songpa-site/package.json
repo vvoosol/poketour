@@ -1,0 +1,14 @@
+{
+  "name": "songpa-pixel-adventure",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node prepare-world.mjs && node prepare-routing.mjs && node build.mjs",
+    "db:generate": "drizzle-kit generate",
+    "test": "node check-game.mjs && node check-routing.mjs && node check-server-v3.mjs && node check-ui.mjs"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2"
+  }
+}
