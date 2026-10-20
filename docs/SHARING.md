@@ -1,6 +1,8 @@
 # 공유 방식: GitHub Pages
 
-실행 파일 저장소는 `vvoosol/poketour-play`입니다. 저장소 루트의 `index.html`과 연결 자산을 GitHub Pages로 제공합니다. Pages가 반환한 실제 URL과 배포 확인 결과는 이 문서에 갱신합니다.
+공유 주소: **https://vvoosol.github.io/poketour-play/**
+
+실행 파일 저장소는 `vvoosol/poketour-play`입니다. 저장소 루트의 `index.html`과 연결 자산을 GitHub Pages로 제공합니다. Pages 게시 원본은 main 브랜치의 `/`이며 HTTPS를 사용합니다.
 
 로그인 없이 플레이하며 진행도는 각 브라우저의 IndexedDB에 저장됩니다. 브라우저나 기기를 바꿀 때는 메뉴에서 저장 파일을 내려받아 복원합니다. GitHub 소스 보기 URL이나 Raw 파일 URL은 게임 공유 주소가 아닙니다.
 

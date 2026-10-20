@@ -8,6 +8,8 @@
 - 배포 실행 파일: `vvoosol/poketour-play` — 공개. 루트 `index.html`과 연결 자산만 배포합니다.
 - 공유 주소는 [GitHub Pages 설정과 확인 결과](docs/SHARING.md)를 참고합니다.
 
+**[Poketour 실행하기](https://vvoosol.github.io/poketour-play/)**
+
 로그인이 필요하지 않습니다. 진행도는 사용 중인 브라우저의 IndexedDB에 저장됩니다. 다른 브라우저나 기기로 자동 동기화되지 않으므로 메뉴의 ‘저장 파일 내려받기’와 복원 기능을 사용하세요. 브라우저 데이터를 지우면 저장도 사라질 수 있습니다. 기존 호스팅의 계정 저장은 자동 이전되지 않습니다.
 
 ## 개발
