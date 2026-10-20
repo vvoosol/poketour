@@ -1,5 +1,12 @@
 # 진행 기록
 
+## HTML 진입점을 최상위로 이동
+
+- 사용자 요청에 따라 실제 게임 HTML 원본을 `songpa-site/index.html`에서 저장소 최상위 `index.html`로 옮겼다.
+- 빌드가 이 최상위 원본을 `songpa-site/dist/client/index.html`로 복사하도록 수정하고 두 파일 일치 검사를 추가했다.
+- 변경 후 `npm run build`, `npm test` 전체 통과. 최상위 원본과 실제 제공 HTML의 일치 검사도 통과했다.
+- HTML 파일 위치와 외부 공유용 실행 URL을 구분해 문서에 설명했다. 외부 공유 URL에는 인증·API·DB를 포함하는 호스팅 배포가 필요하다.
+
 ## 1단계 완료 — 개발 구조와 로컬 실행
 
 - 브랜치: `codex/stage-1-local-development`.

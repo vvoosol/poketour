@@ -32,7 +32,7 @@ npm run preview
 
 | 경로 (`songpa-site/` 기준) | 역할 | 수정/생성 |
 | --- | --- | --- |
-| `index.html` | 웹 진입점, 기존 script 순서 유지 | 원본 |
+| `../index.html` (저장소 최상위) | 웹 진입점, 기존 script 순서 유지 | 원본 |
 | `src/client/*.js`, `*.css` | 화면, 지도, 설정, 기존 UI | 원본 |
 | `src/shared/engine.mjs` | 상태 migration, RNG, 전투, 포획, 성장, 정산 | 원본 |
 | `src/shared/world.mjs`, `routing.mjs` | 실제 경계와 도보 경로 | 원본 |
@@ -56,7 +56,7 @@ npm run preview
 
 ## 빌드와 서버 연결
 
-1. `public`, `src/client`, `src/platform`, `index.html`을 `dist/client`로 복사한다. 기존 classic script 순서는 유지한다.
+1. `public`, `src/client`, `src/platform`과 저장소 최상위 `../index.html`을 `dist/client`로 복사한다. 기존 classic script 순서는 유지한다.
 2. 공유 엔진에서 브라우저용 `engine.js`를 만들고, 시설 seed와 설정을 생성한다.
 3. OSM 원본에서 보행 그래프를 `dist/server/data/foot-graph.json`으로 생성한다. 브라우저에는 제공하지 않는다.
 4. Worker와 공유 엔진을 ESM 모듈로 복사하고 서버 데이터 JSON을 분리한다. 정적 자산 전체의 base64 삽입은 제거했다.

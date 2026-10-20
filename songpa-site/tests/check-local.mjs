@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { startLocalServer } from '../scripts/local-server.mjs';
 import { openLocalDatabase } from '../scripts/local-db.mjs';
-import { projectPath } from '../scripts/paths.mjs';
+import { projectPath, entryHtml } from '../scripts/paths.mjs';
 import { createStaticAssets } from '../scripts/static-assets.mjs';
 import worker from '../dist/server/index.js';
 
@@ -119,6 +119,7 @@ try {
   console.log('PASS platform: API base URL, location provider and resume adapter');
 
   const report = JSON.parse(fs.readFileSync(projectPath('dist/build-report.json')));
+  assert.equal(fs.readFileSync(projectPath('dist/client/index.html'), 'utf8'), fs.readFileSync(entryHtml, 'utf8'), 'Root index.html is the actual built entry');
   for (const file of [...report.assets, ...report.serverFiles]) {
     assert.equal(createHash('sha256').update(fs.readFileSync(projectPath('dist', file.path))).digest('hex'), file.sha256, file.path);
   }

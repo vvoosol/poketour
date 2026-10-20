@@ -6,6 +6,7 @@ GitHub: [vvoosol/poketour](https://github.com/vvoosol/poketour) · 비공개 저
 
 ## 프로젝트
 
+- `index.html`: 프로젝트 최상위의 실제 게임 HTML 진입점.
 - `songpa-site/`: 게임 소스, UI 자산, 데이터, Worker API, DB 스키마 및 검사 코드.
 - `POKETOUR_DEVELOPMENT_PROMPTS.md`: 공통 작업 지침과 5단계 개발 프롬프트.
 - `SONGPA_CODEX_HANDOFF.md`: 이전 구현과 과거 검증 기록.
@@ -33,7 +34,9 @@ npm run preview
 
 `dev`는 빌드 후 화면·API·로컬 DB 서버를 시작한다. `preview`는 기존 빌드로 동일한 로컬 서버를 시작한다. 소스를 수정한 뒤 `dev`를 재시작하면 반영되며 자동 재빌드/HMR은 제공하지 않는다. 개발용 계정은 루프백 전용 Node 어댑터에만 존재하며 `NODE_ENV=production`에서는 시작을 거절한다. 운영 인증 교체와 실제 배포는 후속 단계다.
 
-화면 원본은 `songpa-site/index.html`, `src/client/`, `src/platform/`, `public/`에 있다. `dist/client`는 웹 자산, `dist/server`는 서버 코드·전용 데이터이며 모두 재생성된다. `.local/`, `dist/`, 의존성은 Git에 포함하지 않는다. [개발 구조와 실행 방법](docs/ARCHITECTURE.md)을 참고한다.
+HTML 원본은 최상위 `index.html`이다. 나머지 화면 원본은 `songpa-site/src/client/`, `src/platform/`, `public/`에 있다. 빌드하면 `songpa-site/dist/client/index.html`과 연결 자산이 생성된다. `dist/server`는 서버 코드·전용 데이터이며 모두 재생성된다. `.local/`, `dist/`, 의존성은 Git에 포함하지 않는다. [개발 구조와 실행 방법](docs/ARCHITECTURE.md)을 참고한다.
+
+다른 사람에게 전달하는 웹 주소에는 호스팅 배포가 필요하다. `127.0.0.1`은 실행한 PC 전용 주소이며 GitHub의 파일 링크는 게임 실행 주소가 아니다. 이 게임은 HTML·정적 자산뿐 아니라 인증·API·DB 서버도 함께 연결해야 한다.
 
 ## 작업 방식
 

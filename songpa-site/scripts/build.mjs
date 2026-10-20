@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import { projectRoot, projectPath } from './paths.mjs';
+import { projectRoot, projectPath, entryHtml } from './paths.mjs';
 
 export async function build() {
   // Only the generated output is removed. Authoring files live outside dist.
@@ -14,7 +14,7 @@ export async function build() {
   fs.cpSync(projectPath('public'), projectPath('dist/client'), { recursive: true });
   fs.cpSync(projectPath('src/client'), projectPath('dist/client'), { recursive: true });
   fs.cpSync(projectPath('src/platform'), projectPath('dist/client/platform'), { recursive: true });
-  fs.copyFileSync(projectPath('index.html'), projectPath('dist/client/index.html'));
+  fs.copyFileSync(entryHtml, projectPath('dist/client/index.html'));
   fs.writeFileSync(projectPath('dist/client/runtime-config.js'), 'window.POKETOUR_CONFIG = Object.freeze({apiBaseUrl: ""});\n');
   fs.cpSync(projectPath('src/shared'), projectPath('dist/server/shared'), { recursive: true });
   fs.writeFileSync(projectPath('dist/server/worker.js'), fs.readFileSync(projectPath('worker/index.js'), 'utf8').replaceAll('../src/shared/', './shared/'));

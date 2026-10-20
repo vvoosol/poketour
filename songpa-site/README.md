@@ -4,7 +4,7 @@
 
 Node.js 24에서 `npm ci` 후 `npm run dev`를 실행한다. `http://127.0.0.1:5173/`에서 로컬 개발 계정과 SQLite 저장을 사용한다. 검사 명령은 `npm run build` → `npm test`이며 `npm run preview`는 기존 빌드를 실행한다. 소스 수정 후에는 개발 서버를 재시작한다.
 
-현재 원본은 `index.html`, `src/client/`, `src/shared/`, `src/platform/`, `public/`에 있고 `dist/`는 모두 생성 결과다. 보행 그래프는 `dist/server/data/`에만 생성한다. 자세한 파일 지도와 실행 설정은 저장소의 `docs/ARCHITECTURE.md`를 따른다.
+HTML 원본은 저장소 최상위 `../index.html`이다. 그 외 원본은 이 폴더의 `src/client/`, `src/shared/`, `src/platform/`, `public/`에 있고 `dist/`는 모두 생성 결과다. 보행 그래프는 `dist/server/data/`에만 생성한다. 자세한 파일 지도와 실행 설정은 저장소의 `docs/ARCHITECTURE.md`를 따른다.
 
 ## 기존 게임 규칙과 구현 기록
 
