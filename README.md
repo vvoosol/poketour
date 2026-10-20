@@ -4,6 +4,10 @@
 
 GitHub: [vvoosol/poketour](https://github.com/vvoosol/poketour) · 비공개 저장소.
 
+**공유용 게임 주소:** [송파 모험지도 실행](https://songpa-pixel-adventure.vvoosol.chatgpt.site)
+
+링크를 받은 사람이 접속할 수 있도록 기존 Sites 배포본을 공개했다. 플레이와 계정별 진행도 저장에는 ChatGPT 로그인이 필요하다. 현재 공유 주소는 기존 배포본 11버전이며, 이 저장소의 최근 로컬 구조 변경을 새로 배포한 것은 아니다. [공유 설정과 확인 결과](docs/SHARING.md)를 참고한다.
+
 ## 프로젝트
 
 - `index.html`: 프로젝트 최상위의 실제 게임 HTML 진입점.
@@ -36,7 +40,7 @@ npm run preview
 
 HTML 원본은 최상위 `index.html`이다. 나머지 화면 원본은 `songpa-site/src/client/`, `src/platform/`, `public/`에 있다. 빌드하면 `songpa-site/dist/client/index.html`과 연결 자산이 생성된다. `dist/server`는 서버 코드·전용 데이터이며 모두 재생성된다. `.local/`, `dist/`, 의존성은 Git에 포함하지 않는다. [개발 구조와 실행 방법](docs/ARCHITECTURE.md)을 참고한다.
 
-다른 사람에게 전달하는 웹 주소에는 호스팅 배포가 필요하다. `127.0.0.1`은 실행한 PC 전용 주소이며 GitHub의 파일 링크는 게임 실행 주소가 아니다. 이 게임은 HTML·정적 자산뿐 아니라 인증·API·DB 서버도 함께 연결해야 한다.
+다른 사람에게는 위 공유용 게임 주소를 전달한다. `127.0.0.1`은 실행한 PC 전용 주소이며 GitHub의 파일 링크는 게임 실행 주소가 아니다. 이 게임은 HTML·정적 자산뿐 아니라 인증·API·DB 서버도 함께 연결해야 한다.
 
 ## 작업 방식
 
