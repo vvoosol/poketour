@@ -1,6 +1,8 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';import {DatabaseSync} from 'node:sqlite';import {default as app} from './dist/server/index.js';
+import {createStaticAssets} from '../scripts/static-assets.mjs';
+import {projectPath} from '../scripts/paths.mjs';
+import assert from 'node:assert/strict';import fs from 'node:fs';import {DatabaseSync} from 'node:sqlite';import {default as app} from '../dist/server/index.js';
 const db=new DatabaseSync(':memory:');for(const f of fs.readdirSync('drizzle').filter(x=>x.endsWith('.sql')).sort())db.exec(fs.readFileSync('drizzle/'+f,'utf8'));
-const env={DB:{prepare(sql){return {bind(...args){return {sql,args,async first(){return db.prepare(sql).get(...args)||null;},async run(){return db.prepare(sql).run(...args);},async all(){return {results:db.prepare(sql).all(...args)};}};}};},async batch(statements){db.exec('BEGIN');try{const r=statements.map(q=>({results:db.prepare(q.sql).all(...q.args)}));db.exec('COMMIT');return r;}catch(e){db.exec('ROLLBACK');throw e;}}}};
+const env={ASSETS:createStaticAssets(projectPath('dist/client')),DB:{prepare(sql){return {bind(...args){return {sql,args,async first(){return db.prepare(sql).get(...args)||null;},async run(){return db.prepare(sql).run(...args);},async all(){return {results:db.prepare(sql).all(...args)};}};}};},async batch(statements){db.exec('BEGIN');try{const r=statements.map(q=>({results:db.prepare(q.sql).all(...q.args)}));db.exec('COMMIT');return r;}catch(e){db.exec('ROLLBACK');throw e;}}}};
 const request=(path='/api/state',method='GET',body=null,user='test-user',origin='https://test.example')=>new Request('https://test.example'+path,{method,headers:{...(user?{'oai-authenticated-user-id':user}:{}),Origin:origin,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
 assert.equal((await app.fetch(request('/api/state','GET',null,null),env)).status,401);assert.equal((await app.fetch(request(),{})).status,503);
 const initial=await(await app.fetch(request(),env)).json();assert.equal(initial.state.version,5);assert.equal(initial.revision,0);

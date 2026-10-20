@@ -13,20 +13,27 @@ GitHub: [vvoosol/poketour](https://github.com/vvoosol/poketour) · 비공개 저
 - `AGENTS.md`: 작업 및 GitHub 동기화 규칙.
 - `docs/PROGRESS.md`: 작업과 검증 기록.
 
-## 기존 빌드와 검사
+## 로컬 실행과 검사
 
 Node.js 24 계열에서 프로젝트 폴더로 이동해 실행한다.
 
 ```sh
 cd songpa-site
 npm ci
-npm run build
-npm test
+npm run dev
 ```
 
-현재 `npm run dev`는 없으며 독립 실행용 인증·로컬 서버는 후속 단계에서 구성한다. `index.html` 화면과 별도로 인증·API·DB가 필요한 구조다. 기존 운영 계정과 진행도는 소스만으로 이전되지 않는다.
+`http://127.0.0.1:5173/`에서 실행한다. 개발용 계정은 자동 연결되며, 메뉴 → 체험 시작 → 지도 → 스타팅 선택 순서로 시작한다. 로컬 진행도는 `songpa-site/.local/game.sqlite`에 저장되어 재시작 후에도 유지된다. 서버를 종료하려면 Ctrl+C를 누른다.
 
-`songpa-site/dist/`에는 UI 원본도 포함되어 있으므로 전체 삭제하지 않는다. `dist/server/`와 의존성 등은 생성 결과로 제외한다.
+```sh
+npm run build
+npm test
+npm run preview
+```
+
+`dev`는 빌드 후 화면·API·로컬 DB 서버를 시작한다. `preview`는 기존 빌드로 동일한 로컬 서버를 시작한다. 소스를 수정한 뒤 `dev`를 재시작하면 반영되며 자동 재빌드/HMR은 제공하지 않는다. 개발용 계정은 루프백 전용 Node 어댑터에만 존재하며 `NODE_ENV=production`에서는 시작을 거절한다. 운영 인증 교체와 실제 배포는 후속 단계다.
+
+화면 원본은 `songpa-site/index.html`, `src/client/`, `src/platform/`, `public/`에 있다. `dist/client`는 웹 자산, `dist/server`는 서버 코드·전용 데이터이며 모두 재생성된다. `.local/`, `dist/`, 의존성은 Git에 포함하지 않는다. [개발 구조와 실행 방법](docs/ARCHITECTURE.md)을 참고한다.
 
 ## 작업 방식
 

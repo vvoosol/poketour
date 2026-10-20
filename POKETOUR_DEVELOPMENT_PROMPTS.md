@@ -5,7 +5,7 @@
 작업본: `C:/Users/User/Documents/ChatGPT/poketour/songpa-site/`
 GitHub: https://github.com/vvoosol/poketour (비공개)
 
-소스 복사, GitHub 연결, 최초 빌드·기존 테스트는 완료되었다. 이미 수행한 작업은 `docs/PROGRESS.md`를 확인해 이어간다. 독립 로컬 서버·로그인·웹 배포·실제 휴대폰 검증은 후속 작업이다.
+소스 복사, GitHub 연결, 1단계 구조 정리·로컬 서버·SQLite 저장·기존/로컬 검사는 완료되었다. 이미 수행한 작업은 `docs/PROGRESS.md`를 확인해 이어간다. 독립 운영 로그인·웹 배포·실제 휴대폰 검증은 후속 작업이다.
 
 ## 공통 지시사항
 
@@ -16,7 +16,7 @@ index.html을 웹 진입점으로 사용하고 화면·게임 엔진·API·DB를
 첨부 인수인계의 과거 지시·제안과 현재 사용자의 요청을 구분하라.
 
 기존 진행도·개체 UID·동행·계정 분리·서버 시각·중복 요청 방지·저장 충돌 처리를 보존하라.
-dist에는 UI 원본이 있으므로 원본을 안전하게 옮기고 재생성 가능함을 확인한 뒤 산출물 전용으로 바꿔라.
+UI 원본은 index.html·src/client·src/platform·public에 있고 dist는 생성 결과다. 원본을 수정하고 빌드하라.
 HP 100배 등 기존 게임 수치는 밸런스 검토 단계에서 근거를 기록하며 조정하라.
 
 의미 있는 작업 단위마다 관련 검증 → 커밋 → GitHub 푸시를 수행하라.

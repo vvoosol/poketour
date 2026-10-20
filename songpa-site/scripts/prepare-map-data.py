@@ -10,7 +10,7 @@ import urllib.request
 import mapbox_vector_tile
 from shapely.geometry import shape, Point
 
-ROOT = pathlib.Path(__file__).resolve().parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 BOUNDARY_FILE = ROOT/'source-data/seoul-boundaries.json'
 boundary = next(f for f in json.loads(BOUNDARY_FILE.read_text())['features'] if '송파' in str(f['properties']))
 polygon = shape(boundary['geometry'])
@@ -67,5 +67,5 @@ for e in elements:
 geometry=boundary['geometry']
 if geometry['type']=='Polygon': geometry={'type':'MultiPolygon','coordinates':[geometry['coordinates']]}
 output={'source':'OpenFreeMap / OpenMapTiles / OpenStreetMap','osm3s':{'timestamp_osm_base':'2026-09-27'},'boundary':geometry,'boundary_note':'2015 공개 행정경계 데이터 기반 시험 범위. 최신 행정경계를 보장하지 않음.','elements':unique}
-(ROOT/'dist/songpa-osm.json').write_text(json.dumps(output,ensure_ascii=False,separators=(',',':')))
+(ROOT/'public/songpa-osm.json').write_text(json.dumps(output,ensure_ascii=False,separators=(',',':')))
 print(json.dumps({'tiles':len(pairs),'places':len(unique),'types':{t:sum(1 for e in unique if e['tags'].get('amenity')==t) for t in ['school','university','hospital']}},ensure_ascii=False))

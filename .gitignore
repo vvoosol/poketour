@@ -1,8 +1,8 @@
 # Local dependencies and generated server bundles
 **/node_modules/
 **/.sites-runtime/
-songpa-site/dist/server/
-songpa-site/dist/.openai/
+songpa-site/dist/
+**/.local/
 
 # Secrets, local runtime state, and databases
 .env
@@ -28,4 +28,4 @@ songpa-site/dist/.openai/
 Thumbs.db
 .vscode/
 
-# dist currently contains authored UI and assets: do not ignore or delete it.
+# Authored UI/assets now live in index.html, src/, and public/; dist is generated.

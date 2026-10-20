@@ -1,5 +1,5 @@
 import csv,json,pathlib,collections,hashlib
-R=pathlib.Path(__file__).parent
+R=pathlib.Path(__file__).resolve().parent.parent
 def rows(n):
  with open(R/'source-data'/f'{n}.csv',encoding='utf-8') as f:return list(csv.DictReader(f))
 def index(n,key='id'):return {int(r[key]):r for r in rows(n)}
@@ -49,7 +49,7 @@ species={}
 for i,s in sp.items():
  p=int(pk[i]['id']);available=learn[p];v=max(available,key=lambda v:int(vg[v]['order'])) if available else None
  lm=sorted({tuple(x) for x in available.get(v,[])})
- species[i]={'id':i,'pokemonId':p,'name':sn.get(i,s['identifier']),'en':s['identifier'],'gen':int(s['generation_id']),'types':types[p],'stats':[stats[p][k] for k in range(1,7)],'abilities':abilities[p],'captureRate':int(s['capture_rate']),'growth':int(s['growth_rate_id']),'baseExp':int(pk[i]['base_experience'] or 64),'from':int(s['evolves_from_species_id']) if s['evolves_from_species_id'] else None,'habitatOriginal':s['habitat_id'] or None,'description':flavor.get(i,eng.get(i,'')),'descriptionLanguage':'ko' if i in flavor else 'en','learn':lm,'machine':sorted(machine[p].get(v,set())),'learnVersion':vg[v]['identifier'] if v else None,'evolutions':ev[i],'image':f'./sprite-{i}.png' if (R/'dist'/f'sprite-{i}.png').exists() else f'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p}.png'}
+ species[i]={'id':i,'pokemonId':p,'name':sn.get(i,s['identifier']),'en':s['identifier'],'gen':int(s['generation_id']),'types':types[p],'stats':[stats[p][k] for k in range(1,7)],'abilities':abilities[p],'captureRate':int(s['capture_rate']),'growth':int(s['growth_rate_id']),'baseExp':int(pk[i]['base_experience'] or 64),'from':int(s['evolves_from_species_id']) if s['evolves_from_species_id'] else None,'habitatOriginal':s['habitat_id'] or None,'description':flavor.get(i,eng.get(i,'')),'descriptionLanguage':'ko' if i in flavor else 'en','learn':lm,'machine':sorted(machine[p].get(v,set())),'learnVersion':vg[v]['identifier'] if v else None,'evolutions':ev[i],'image':f'./sprite-{i}.png' if (R/'public'/f'sprite-{i}.png').exists() else f'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p}.png'}
 moveMeta=index('move_meta','move_id');changes=collections.defaultdict(list)
 for r in rows('move_meta_stat_changes'):changes[int(r['move_id'])].append([int(r['stat_id']),int(r['change'])])
 moves={}
@@ -60,8 +60,8 @@ exp=collections.defaultdict(dict)
 for r in rows('experience'):exp[int(r['growth_rate_id'])][int(r['level'])]=int(r['experience'])
 counts=dict(collections.Counter(s['gen'] for s in species.values()))
 report={'species':len(species),'generations':counts,'forms':len(rows('pokemon'))-len(species),'missingKorean':[i for i in species if i not in sn],'englishDescriptions':[i for i in species if i not in flavor],'habitatReview':review,'special':special,'wildSpecies':sum(h['wild'] for h in habitat.values()),'missingLearnsets':[i for i,s in species.items() if not s['learn']],'source':'https://github.com/PokeAPI/pokeapi/tree/master/data/v2/csv','collected':'2026-10-04','rules':'종별 SV DLC까지 제공된 최신 레벨·TM 습득표. 미등록 종은 직전 제공 버전. 데이터의 종족값·타입 상성, 게임용 단순화 효과 규칙.'}
-report['missingCachedImages']=[i for i in species if not (R/'dist'/f'sprite-{i}.png').exists()]
+report['missingCachedImages']=[i for i in species if not (R/'public'/f'sprite-{i}.png').exists()]
 data={'species':species,'moves':moves,'types':{i:{'name':tn.get(i,r['identifier']),'en':r['identifier']} for i,r in index('types').items()},'abilities':{i:an.get(i,r['identifier']) for i,r in index('abilities').items()},'efficacy':{r['damage_type_id']+':'+r['target_type_id']:int(r['damage_factor'])/100 for r in rows('type_efficacy')},'experience':exp,'items':{i:{'name':it.get(i,r['identifier']),'en':r['identifier']} for i,r in index('items').items()},'habitats':habitat,'report':report}
-(R/'dist/pokemon-data.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')))
-(R/'dist/data-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+(R/'public/pokemon-data.json').write_text(json.dumps(data,ensure_ascii=False,separators=(',',':')))
+(R/'public/data-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
 print(json.dumps({k:v for k,v in report.items() if not isinstance(v,list)},ensure_ascii=False))
