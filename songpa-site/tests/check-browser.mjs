@@ -1,0 +1,98 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {IDBFactory} from 'fake-indexeddb';
+import {createBrowserStore} from '../src/platform/browser-store.mjs';
+import {projectPath} from '../scripts/paths.mjs';
+
+const factory = new IDBFactory();
+const fetched = [];
+const fetcher = async url => {
+  const parsed = new URL(url);
+  assert.equal(parsed.origin,'https://vvoosol.github.io');
+  assert(parsed.pathname.startsWith('/poketour-play/'));
+  assert(!parsed.pathname.includes('/api/'));
+  const name = parsed.pathname.slice('/poketour-play/'.length);
+  fetched.push(name);
+  return new Response(fs.readFileSync(projectPath('dist/client',name)),{headers:{'Content-Type':'application/json'}});
+};
+let now = 1800000000000;
+const options = {indexedDB:factory,fetcher,clock:()=>now,dbName:'browser-test',baseUrl:'https://vvoosol.github.io/poketour-play/'};
+let store = await createBrowserStore(options);
+const read = async runtime => (await runtime.request('/api/state')).json();
+let current = await read(store);
+assert.equal(current.revision,0);
+assert(!fetched.includes('foot-graph.json'),'Routing graph is lazy');
+const call = async (runtime,action,payload={},requestId=crypto.randomUUID(),revision=current.revision,endpoint='/api/action') => {
+  const response = await runtime.request(endpoint,{method:'POST',body:JSON.stringify({revision,requestId,action,payload})});
+  const result = await response.json();
+  if (response.ok) current=result;
+  return {status:response.status,result};
+};
+assert.equal((await call(store,'demo')).status,200);
+const starter = await call(store,'starter',{id:749},'starter-request');
+assert.equal(starter.status,200);
+assert.equal(starter.result.state.starter,749);
+const saved = structuredClone(current);
+const replay = await call(store,'starter',{id:749},'starter-request',0);
+assert.equal(replay.result.replayed,true);
+assert.deepEqual(replay.result.state,saved.state);
+assert.equal((await call(store,'starter',{id:318})).status,400);
+assert.equal((await call(store,'debug-spawn')).status,400);
+assert.equal((await call(store,'favorite',{id:'hospital-asan'},'stale',0)).status,409);
+store.close();
+store = await createBrowserStore(options);
+assert.deepEqual(await read(store),saved,'Reopening IndexedDB retains revision, UID, party, money and position');
+
+const otherTab = await createBrowserStore(options);
+const revision = saved.revision;
+const concurrent = await Promise.all([
+  call(store,'favorite',{id:'hospital-asan'},'tab-one',revision),
+  call(otherTab,'favorite',{id:'park-olympic'},'tab-two',revision),
+]);
+assert.deepEqual(concurrent.map(x=>x.status).sort(),[200,409]);
+current = await read(store);
+const route = await call(store,'route',{id:'park-olympic',mode:'walk'},'route-plan',current.revision,'/api/route');
+assert.equal(route.status,200,route.result.error);
+assert.equal(route.result.plan.routingMethod,'songpa-a-star');
+assert.equal(fetched.filter(x=>x==='foot-graph.json').length,1);
+assert.equal((await call(store,'start',{token:'wrong'})).status,400);
+const start = await call(store,'start',{token:route.result.plan.token});
+assert.equal(start.status,200);
+assert(start.result.state.travel);
+now+=1000;
+assert.equal((await call(store,'cancel')).status,200);
+const history = await (await store.request('/api/events')).json();
+assert(history.events.some(e=>e.kind==='starter'));
+assert.equal(new Set(history.events.map(e=>e.id)).size,history.events.length);
+const backup = await store.backup();
+const beforeInvalid = await read(store);
+await assert.rejects(store.restore({format:'wrong',state:backup.state}),/지원하지/);
+await assert.rejects(store.restore({...backup,state:{...backup.state,player:{...backup.state.player,money:-1}}}),/잘못/);
+assert.deepEqual(await read(store),beforeInvalid);
+const imported = await createBrowserStore({...options,dbName:'imported-browser'});
+const restored = await imported.restore(backup);
+assert.deepEqual(restored.state.player,backup.state.player);
+assert.deepEqual(restored.state.game,backup.state.game);
+assert.equal(restored.state.companionUid,backup.state.companionUid);
+const restoredHistory = await (await imported.request('/api/events')).json();
+assert.deepEqual(restoredHistory.events,history.events);
+const separate = await createBrowserStore({...options,dbName:'separate-browser'});
+assert.equal((await read(separate)).state.starter,null);
+for (const runtime of [store,otherTab,imported,separate]) runtime.close();
+console.log('PASS browser IndexedDB: starter, replay, reopening, multi-tab CAS, lazy A*, travel, events, backup/restore, invalid import, independent browser');
+
+const apiCalls=[];
+const context=vm.createContext({window:{POKETOUR_CONFIG:{storageMode:'browser'},addEventListener(){}},document:{addEventListener(){},removeEventListener(){}},navigator:{},fetch:()=>{throw Error('Pages must not fetch a backend API');},URL});
+vm.runInContext(fs.readFileSync(projectPath('src/platform/browser.js'),'utf8'),context);
+const platform=context.window.createPoketourPlatform({config:{storageMode:'browser'},browserStore:{request:(...args)=>{apiCalls.push(args);return Response.json({ok:true});},backup:()=>backup}});
+assert((await platform.apiFetch('/api/state')).ok);
+assert.equal(apiCalls[0][0],'/api/state');
+assert.equal(platform.auth.loginUrl,'./');
+assert.equal(platform.allowDebug,false);
+assert.match(platform.saveLabel,/브라우저/);
+const html=fs.readFileSync(projectPath('dist/client/index.html'),'utf8');
+assert(!html.includes('chatgpt.site'));
+assert(!fs.readFileSync(projectPath('dist/client/platform/browser.js'),'utf8').includes('signin-with-chatgpt'));
+assert(fs.readFileSync(projectPath('dist/client/runtime-config.js'),'utf8').includes('storageMode:"browser"'));
+console.log('PASS Pages configuration: relative project paths, in-browser API, no login/GPT hosting dependency');

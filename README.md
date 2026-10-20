@@ -1,47 +1,39 @@
 # Poketour
 
-송파구 실제 지도 기반 도트풍 모험 게임. 기존 웹 구현을 이어서 독립 웹 배포, PWA, 향후 Android/iOS 앱으로 확장한다.
+송파구 실제 지도에서 이동·전투·포획·성장을 즐기는 웹 게임입니다. 최상위 `index.html`을 진입점으로 빌드하고 GitHub Pages로 공유합니다.
 
-GitHub: [vvoosol/poketour](https://github.com/vvoosol/poketour) · 비공개 저장소.
+## 저장소와 실행
 
-**공유용 게임 주소:** [송파 모험지도 실행](https://songpa-pixel-adventure.vvoosol.chatgpt.site)
+- 개발 원본: `vvoosol/poketour` — 비공개.
+- 배포 실행 파일: `vvoosol/poketour-play` — 공개. 루트 `index.html`과 연결 자산만 배포합니다.
+- 공유 주소는 [GitHub Pages 설정과 확인 결과](docs/SHARING.md)를 참고합니다.
 
-링크를 받은 사람이 접속할 수 있도록 기존 Sites 배포본을 공개했다. 플레이와 계정별 진행도 저장에는 ChatGPT 로그인이 필요하다. 현재 공유 주소는 기존 배포본 11버전이며, 이 저장소의 최근 로컬 구조 변경을 새로 배포한 것은 아니다. [공유 설정과 확인 결과](docs/SHARING.md)를 참고한다.
+로그인이 필요하지 않습니다. 진행도는 사용 중인 브라우저의 IndexedDB에 저장됩니다. 다른 브라우저나 기기로 자동 동기화되지 않으므로 메뉴의 ‘저장 파일 내려받기’와 복원 기능을 사용하세요. 브라우저 데이터를 지우면 저장도 사라질 수 있습니다. 기존 호스팅의 계정 저장은 자동 이전되지 않습니다.
 
-## 프로젝트
+## 개발
 
-- `index.html`: 프로젝트 최상위의 실제 게임 HTML 진입점.
-- `songpa-site/`: 게임 소스, UI 자산, 데이터, Worker API, DB 스키마 및 검사 코드.
-- `POKETOUR_DEVELOPMENT_PROMPTS.md`: 공통 작업 지침과 5단계 개발 프롬프트.
-- `SONGPA_CODEX_HANDOFF.md`: 이전 구현과 과거 검증 기록.
-- `컨셉 이미지1.png`: UI 시각 참고.
-- `AGENTS.md`: 작업 및 GitHub 동기화 규칙.
-- `docs/PROGRESS.md`: 작업과 검증 기록.
-
-## 로컬 실행과 검사
-
-Node.js 24 계열에서 프로젝트 폴더로 이동해 실행한다.
+Node.js 24 환경에서 실행합니다.
 
 ```sh
 cd songpa-site
 npm ci
-npm run dev
-```
-
-`http://127.0.0.1:5173/`에서 실행한다. 개발용 계정은 자동 연결되며, 메뉴 → 체험 시작 → 지도 → 스타팅 선택 순서로 시작한다. 로컬 진행도는 `songpa-site/.local/game.sqlite`에 저장되어 재시작 후에도 유지된다. 서버를 종료하려면 Ctrl+C를 누른다.
-
-```sh
 npm run build
 npm test
-npm run preview
 ```
 
-`dev`는 빌드 후 화면·API·로컬 DB 서버를 시작한다. `preview`는 기존 빌드로 동일한 로컬 서버를 시작한다. 소스를 수정한 뒤 `dev`를 재시작하면 반영되며 자동 재빌드/HMR은 제공하지 않는다. 개발용 계정은 루프백 전용 Node 어댑터에만 존재하며 `NODE_ENV=production`에서는 시작을 거절한다. 운영 인증 교체와 실제 배포는 후속 단계다.
+`dist/client/`는 서버 없이 실행 가능한 GitHub Pages 산출물입니다. 파일을 더블클릭하는 대신 HTTP/HTTPS 정적 호스팅으로 엽니다. `npm run dev`와 `npm run preview`는 회귀 검사용 선택적 로컬 SQLite 서버이며 Pages 실행에 필요하지 않습니다.
 
-HTML 원본은 최상위 `index.html`이다. 나머지 화면 원본은 `songpa-site/src/client/`, `src/platform/`, `public/`에 있다. 빌드하면 `songpa-site/dist/client/index.html`과 연결 자산이 생성된다. `dist/server`는 서버 코드·전용 데이터이며 모두 재생성된다. `.local/`, `dist/`, 의존성은 Git에 포함하지 않는다. [개발 구조와 실행 방법](docs/ARCHITECTURE.md)을 참고한다.
+원본은 저장소 루트 `index.html`, `songpa-site/src/client`, `src/shared`, `src/platform`, `public`에 있습니다. 빌드된 파일을 직접 수정하지 않습니다.
 
-다른 사람에게는 위 공유용 게임 주소를 전달한다. `127.0.0.1`은 실행한 PC 전용 주소이며 GitHub의 파일 링크는 게임 실행 주소가 아니다. 이 게임은 HTML·정적 자산뿐 아니라 인증·API·DB 서버도 함께 연결해야 한다.
+## 배포
 
-## 작업 방식
+변경을 검증하고 개발 원본을 커밋·푸시한 다음 실행합니다.
 
-의미 있는 변경 → 관련 검증 → 커밋 → GitHub 푸시 순서로 진행한다. 후속 기능은 `codex/` 작업 브랜치에서 개발한다. 로컬 비밀값과 사용자 DB는 저장소에 포함하지 않는다.
+```sh
+cd songpa-site
+npm run deploy:pages
+```
+
+이 명령은 GitHub CLI의 기존 로그인을 이용해 검증된 실행 파일만 공개 배포 저장소에 올립니다. GitHub Pages는 배포 저장소의 main 브랜치 루트에서 자동 갱신됩니다. 토큰을 코드에 넣지 않습니다. [실행 구조](docs/ARCHITECTURE.md)를 참고하세요.
+
+기존 호스팅과 로그인 방식은 사용을 중단했습니다. 이전 문서와 설정은 `docs/archive/`에 역사 기록으로 보존했습니다.

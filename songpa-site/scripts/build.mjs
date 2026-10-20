@@ -12,10 +12,13 @@ export async function build() {
   fs.mkdirSync(projectPath('dist/client'), { recursive: true });
   fs.mkdirSync(projectPath('dist/server/data'), { recursive: true });
   fs.cpSync(projectPath('public'), projectPath('dist/client'), { recursive: true });
+  fs.copyFileSync(projectPath('source-data/PokeAPI-LICENSE.md'),projectPath('dist/client/PokeAPI-LICENSE.md'));
   fs.cpSync(projectPath('src/client'), projectPath('dist/client'), { recursive: true });
   fs.cpSync(projectPath('src/platform'), projectPath('dist/client/platform'), { recursive: true });
+  fs.cpSync(projectPath('src/shared'), projectPath('dist/client/shared'), { recursive: true });
   fs.copyFileSync(entryHtml, projectPath('dist/client/index.html'));
-  fs.writeFileSync(projectPath('dist/client/runtime-config.js'), 'window.POKETOUR_CONFIG = Object.freeze({apiBaseUrl: ""});\n');
+  fs.writeFileSync(projectPath('dist/client/runtime-config.js'), 'window.POKETOUR_CONFIG = Object.freeze({storageMode:"browser",apiBaseUrl:"",allowDebug:false});\n');
+  fs.writeFileSync(projectPath('dist/client/.nojekyll'), '');
   fs.cpSync(projectPath('src/shared'), projectPath('dist/server/shared'), { recursive: true });
   fs.writeFileSync(projectPath('dist/server/worker.js'), fs.readFileSync(projectPath('worker/index.js'), 'utf8').replaceAll('../src/shared/', './shared/'));
   fs.writeFileSync(projectPath('dist/client/engine.js'), fs.readFileSync(projectPath('src/shared/engine.mjs'), 'utf8').replace('export function createEngine', 'window.createEngine = function createEngine'));
@@ -27,11 +30,11 @@ export async function build() {
     await import(`./prepare-world.mjs?build=${stamp}`);
     await import(`./prepare-routing.mjs?build=${stamp}`);
   } finally { process.chdir(oldCwd); }
+  fs.copyFileSync(projectPath('dist/server/data/foot-graph.json'), projectPath('dist/client/foot-graph.json'));
   for (const name of ['pokemon-data.json', 'game-settings.json', 'world-seed.json', 'facility-evidence.json']) {
     fs.copyFileSync(projectPath('dist/client', name), projectPath('dist/server/data', name));
   }
-  const readme = fs.readFileSync(projectPath('README.md'), 'utf8').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-  fs.writeFileSync(projectPath('dist/client/README.html'), `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Poketour 구현 기록</title><style>body{max-width:860px;margin:auto;padding:24px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style><a href="./">모험으로 돌아가기</a><pre>${readme}</pre></html>`);
+  fs.writeFileSync(projectPath('dist/client/README.html'), '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Poketour 도움말</title><h1>Poketour</h1><p>로그인 없이 플레이할 수 있습니다. 진행도는 이 브라우저에 저장됩니다. 메뉴에서 저장 파일을 내려받아 백업하세요. 브라우저 데이터를 지우면 진행도가 사라질 수 있습니다.</p><a href="./">게임으로 돌아가기</a></html>');
   const entry = `import {createWorker} from './worker.js';
 import pokemonData from './data/pokemon-data.json' with {type:'json'};
 import settings from './data/game-settings.json' with {type:'json'};

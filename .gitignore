@@ -3,6 +3,7 @@
 **/.sites-runtime/
 songpa-site/dist/
 **/.local/
+**/.pages-publish/
 
 # Secrets, local runtime state, and databases
 .env

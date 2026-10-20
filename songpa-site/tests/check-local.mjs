@@ -60,7 +60,7 @@ try {
   const replayed = await post('starter', { id: 749 }, 'local-starter', 0);
   assert.equal(replayed.replayed, true);
   assert.deepEqual(replayed.state, saved);
-  const spoof = await fetch(runtime.origin + '/api/state', { headers: { 'oai-authenticated-user-id': 'someone-else' } });
+  const spoof = await fetch(runtime.origin + '/api/state', { headers: { 'x-poketour-user': 'someone-else' } });
   assert.deepEqual((await spoof.json()).state, saved, 'Client identity header cannot change local user');
   assert.equal((await fetch(runtime.origin + '/api/action', { method: 'POST', headers: { Origin: 'https://evil.example' }, body: '{}' })).status, 403);
   assert.equal((await fetch(runtime.origin + '/api/action', { method: 'POST', headers: { Origin: runtime.origin }, body: 'x'.repeat(16001) })).status, 413);
@@ -74,7 +74,7 @@ try {
     request.on('error', reject); request.end();
   });
   assert.equal(remoteTarget, 403);
-  for (const route of ['/foot-graph.json', '/server/index.js', '/.local/game.sqlite', '/%2e%2e%2fscripts/local-server.mjs']) {
+  for (const route of ['/server/index.js', '/.local/game.sqlite', '/%2e%2e%2fscripts/local-server.mjs']) {
     assert.equal((await fetch(runtime.origin + route)).status, 404, route);
   }
   const home = await fetch(runtime.origin);
@@ -123,9 +123,9 @@ try {
   for (const file of [...report.assets, ...report.serverFiles]) {
     assert.equal(createHash('sha256').update(fs.readFileSync(projectPath('dist', file.path))).digest('hex'), file.sha256, file.path);
   }
-  assert(!report.assets.some(file => file.path.endsWith('foot-graph.json')));
+  assert(report.assets.some(file => file.path.endsWith('foot-graph.json')));
   assert(!fs.readFileSync(projectPath('dist/server/worker.js'), 'utf8').includes('local-developer'));
-  console.log('PASS output integrity: file hashes, server-only graph, no local auth in Worker');
+  console.log('PASS output integrity: file hashes, browser graph, no local auth in Worker');
 } finally {
   if (runtime) await runtime.close();
   fs.rmSync(temporary, { recursive: true, force: true });

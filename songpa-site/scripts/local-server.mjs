@@ -10,7 +10,7 @@ export async function startLocalServer({ port = 5173, userId = 'local-developer'
   if (!/^[a-zA-Z0-9_-]{1,80}$/.test(userId)) throw Error('Invalid local development user');
   const { default: app } = await import(pathToFileURL(projectPath('dist/server/index.js')).href);
   const local = openLocalDatabase(dbFile);
-  const env = { DB: local.DB, ASSETS: createStaticAssets(projectPath('dist/client')) };
+  const env = { DB: local.DB, ASSETS: createStaticAssets(projectPath('dist/client')), resolveUser:()=>userId };
   let origin;
   const server = http.createServer(async (incoming, outgoing) => {
     try {
@@ -30,16 +30,15 @@ export async function startLocalServer({ port = 5173, userId = 'local-developer'
       }
       const headers = new Headers();
       for (const [key, value] of Object.entries(incoming.headers)) {
-        if (value !== undefined && !['oai-authenticated-user-id', 'host'].includes(key)) headers.set(key, Array.isArray(value) ? value.join(', ') : value);
+        if (value !== undefined && key !== 'host') headers.set(key, Array.isArray(value) ? value.join(', ') : value);
       }
       // Incoming user headers are ignored; this identity exists only in this local Node adapter.
-      headers.set('oai-authenticated-user-id', userId);
       const method = incoming.method;
       const request = new Request(target, { method, headers, ...(!['GET', 'HEAD'].includes(method) ? { body: Buffer.concat(chunks) } : {}) });
       const url = new URL(request.url);
       let response;
       if (url.pathname === '/runtime-config.js' && ['GET', 'HEAD'].includes(method)) {
-        const config = `window.POKETOUR_CONFIG = Object.freeze(${JSON.stringify({ apiBaseUrl: '', auth: { loginUrl: '/', loginLabel: '로컬 개발 계정' } })});\n`;
+        const config = `window.POKETOUR_CONFIG = Object.freeze(${JSON.stringify({ storageMode:'server', apiBaseUrl: '', auth: { loginUrl: '/', loginLabel: '로컬 개발 계정' } })});\n`;
         response = new Response(method === 'HEAD' ? null : config, { headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-store' } });
       } else response = await app.fetch(request, env);
       outgoing.writeHead(response.status, Object.fromEntries(response.headers));

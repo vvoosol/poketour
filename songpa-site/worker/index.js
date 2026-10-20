@@ -17,7 +17,7 @@ export function createWorker(resources){
  }
  return {async fetch(request,env){const url=new URL(request.url);
  if(url.pathname.startsWith('/api/')){
- const user=request.headers.get('oai-authenticated-user-id');if(!user)return json({error:'로그인을 확인할 수 없습니다. 같은 계정으로 다시 열어 주세요.'},401);if(!env.DB)return json({error:'진행도 저장소가 연결되지 않았습니다.'},503);
+ const user=await env.resolveUser?.(request);if(!user)return json({error:'로컬 실행 환경을 확인하고 다시 불러와 주세요.'},401);if(!env.DB)return json({error:'진행도 저장소가 연결되지 않았습니다.'},503);
  try{await cachedWorld(env);
  if(url.pathname==='/api/events'&&request.method==='GET'){const before=Number(url.searchParams.get('before')||Number.MAX_SAFE_INTEGER);if(!Number.isSafeInteger(before)||before<0)return json({error:'기록 페이지 오류'},400);const result=await env.DB.prepare('SELECT event FROM game_events WHERE user_id=? AND event_id<? ORDER BY event_id DESC LIMIT 51').bind(user,before).all();const rows=result.results||[];return json({events:rows.slice(0,50).map(r=>JSON.parse(r.event)),nextBefore:rows.length>50?JSON.parse(rows[49].event).id:null});}
  if(url.pathname==='/api/world'&&request.method==='GET')return json(await loadWorld(env));
