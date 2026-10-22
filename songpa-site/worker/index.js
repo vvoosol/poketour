@@ -1,7 +1,11 @@
+import {createEngine} from '../src/shared/engine.mjs';
+import {createFootRouter} from '../src/shared/routing.mjs';
+import {createWorld,routePlan,fetchWorld} from '../src/shared/world.mjs';
+
 const json=(body,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
-export function createWorker(assets){
- const read=name=>{const binary=atob(assets[name].data),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return JSON.parse(new TextDecoder().decode(bytes));};
- const D=read('pokemon-data.json'),C=read('game-settings.json'),seed=read('world-seed.json'),proof=read('facility-evidence.json'),wm=createWorld(seed,proof),E=createEngine(D,C,wm.world);let footRouter=null;const localFootRouter=()=>footRouter||(footRouter=createFootRouter(read('foot-graph.json')));
+export function createWorker(resources){
+ const {pokemonData:D,settings:C,seed,evidence:proof}=resources;
+ const wm=createWorld(seed,proof),E=createEngine(D,C,wm.world);let footRouter=null;const localFootRouter=()=>footRouter||(footRouter=createFootRouter(resources.loadFootGraph()));
  let worldReady=false,worldPromise=null;
  async function cachedWorld(env){if(worldReady)return;const row=await env.DB.prepare('SELECT value FROM world_cache WHERE key=?').bind('osm-boundaries').first();if(row){wm.ingest(JSON.parse(row.value));worldReady=true;}}
  async function loadWorld(env){await cachedWorld(env);if(worldReady)return wm.world;if(!worldPromise)worldPromise=(async()=>{try{const raw=await fetchWorld();wm.ingest(raw);console.log(JSON.stringify({worldLoaded:true,features:wm.world.features.length,missingParks:wm.world.unresolved,status:wm.world.status}));await env.DB.prepare('INSERT INTO world_cache (key,value,updated_at) VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at').bind('osm-boundaries',JSON.stringify(raw),Date.now()).run();worldReady=true;return wm.world;}catch(e){wm.world.status=e.message;return wm.world;}finally{worldPromise=null;}})();return worldPromise;}
@@ -13,7 +17,7 @@ export function createWorker(assets){
  }
  return {async fetch(request,env){const url=new URL(request.url);
  if(url.pathname.startsWith('/api/')){
- const user=request.headers.get('oai-authenticated-user-id');if(!user)return json({error:'로그인을 확인할 수 없습니다. 같은 계정으로 다시 열어 주세요.'},401);if(!env.DB)return json({error:'진행도 저장소가 연결되지 않았습니다.'},503);
+ const user=await env.resolveUser?.(request);if(!user)return json({error:'로컬 실행 환경을 확인하고 다시 불러와 주세요.'},401);if(!env.DB)return json({error:'진행도 저장소가 연결되지 않았습니다.'},503);
  try{await cachedWorld(env);
  if(url.pathname==='/api/events'&&request.method==='GET'){const before=Number(url.searchParams.get('before')||Number.MAX_SAFE_INTEGER);if(!Number.isSafeInteger(before)||before<0)return json({error:'기록 페이지 오류'},400);const result=await env.DB.prepare('SELECT event FROM game_events WHERE user_id=? AND event_id<? ORDER BY event_id DESC LIMIT 51').bind(user,before).all();const rows=result.results||[];return json({events:rows.slice(0,50).map(r=>JSON.parse(r.event)),nextBefore:rows.length>50?JSON.parse(rows[49].event).id:null});}
  if(url.pathname==='/api/world'&&request.method==='GET')return json(await loadWorld(env));
@@ -37,6 +41,8 @@ export function createWorker(assets){
  s.receipts=[...(s.receipts||[]),input.requestId].slice(-40);const rev=await save(env,user,s,revision);if(!rev)return json({error:'진행도 저장 충돌. 다시 불러와 주세요.'},409);return json({state:s,revision:rev,serverNow:Date.now(),plan:s.routePlan,worldStatus:wm.world.status});
  }catch(e){return json({error:e.message||'요청을 처리하지 못했습니다.'},400);}
  }
- if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});const pathname=url.pathname==='/'?'index.html':url.pathname.slice(1),asset=assets[pathname];if(!asset)return new Response('Not found',{status:404});const bytes=Uint8Array.from(atob(asset.data),c=>c.charCodeAt(0));return new Response(request.method==='HEAD'?null:bytes,{headers:{'Content-Type':asset.type,'Cache-Control':pathname==='index.html'||pathname.endsWith('.js')?'no-cache':'public, max-age=300','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'geolocation=(self)'}});
+ if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
+ if(!env.ASSETS)return new Response('Static assets binding is not configured',{status:503});
+ return env.ASSETS.fetch(request);
  }};
 }

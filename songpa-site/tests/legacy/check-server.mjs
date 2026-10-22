@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {DatabaseSync} from 'node:sqlite';
+import {createWorker} from './worker/index.js';
+const db=new DatabaseSync(':memory:');db.exec(fs.readFileSync('drizzle/0000_hard_vampiro.sql','utf8'));
+const env={DB:{prepare(sql){return {bind(...args){return {async first(){return db.prepare(sql).get(...args)||null;}};}};}}};
+const app=createWorker({'index.html':{type:'text/html',data:Buffer.from('<h1>Map</h1>').toString('base64')}});
+function req(method='GET',body,user='test-user',origin='https://test.example'){return new Request('https://test.example/api/state',{method,headers:{...(user?{'oai-authenticated-user-id':user}:{}),'Origin':origin,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});}
+assert.equal((await app.fetch(req('GET',null,null),env)).status,401);
+assert.equal((await app.fetch(req(),{})).status,503);
+assert.equal((await app.fetch(req('PUT',{},'test-user','https://evil.example'),env)).status,403);
+let response=await app.fetch(req(),env),result=await response.json();assert.equal(result.state,null);
+const state={version:2,mode:'demo',game:{coord:[127.1,37.5],placeId:null},travel:{durationMs:2700000,geometry:[[127.1,37.5],[127.11,37.51]],departAt:1,arriveAt:2},activity:null,player:{party:[],mounts:[],money:0,progress:{}},lastArrivalId:null,gps:{privateHistory:'must never be persisted'}};
+response=await app.fetch(req('PUT',{state,revision:0,operation:'start'}),env);assert.equal(response.status,200);result=await response.json();assert.equal(result.revision,1);assert.equal(result.state.travel.arriveAt-result.state.travel.departAt,2700000);assert(result.state.travel.departAt>1);assert(!('gps' in result.state));
+const load=await(await app.fetch(req(),env)).json();assert.deepEqual(load.state,result.state);
+assert.equal((await app.fetch(req('PUT',{state,revision:0}),env)).status,409);
+assert.equal((await(await app.fetch(req('GET',null,'other-user'),env)).json()).state,null);
+const page=await app.fetch(new Request('https://test.example/'),env);assert.equal(page.status,200);assert((await page.text()).includes('Map'));
+const bundle=await import('./dist/server/index.js');assert.equal(typeof bundle.default.fetch,'function');const html=await bundle.default.fetch(new Request('https://test.example/'),env);assert((await html.text()).includes('현재 실제 위치에서 합류'));
+console.log('PASS server: real SQLite migration, auth, per-user isolation, origin, storage failure, timestamp authority, save/reload, stale revision conflict, GPS omission, static assets and deployed ESM shape.');
+db.close();
