@@ -24,6 +24,19 @@ for(const [index,id]of [749,318,940].entries()){
  combatDisplay=null;game.huntTargetId=null;
  game.fieldWilds=[];syncFieldMarkers();if(fieldMarkers.size||liveMarkers.size)throw Error('Stale markers were not removed');map=undefined;const companionRoot=node('div');gameMarker={getElement:()=>companionRoot};companionElement=null;for(let i=0;i<100;i++)syncCompanion();if(companionRoot.children.length!==1||companionElement.src!==D.species[game.player.party[0].speciesId].image)throw Error('Follower duplicated or has wrong species');gameMarker=null;companionElement=null;
  `,context);
+ await vm.runInContext(`(async()=>{
+ const saved=game,oldSelected=selected,oldAction=action;
+ try{
+  game=JSON.parse(JSON.stringify(game));game.battle=null;game.travel=null;
+  const facility=places.find(p=>p.type==='shop'),other=places.find(p=>p.id!==facility.id);
+  game.game={coord:facility.coord,placeId:null};renderArrivalActivity();if(!$('arrival-activity').hidden)throw Error('Activity icon visible before arrival');
+  game.game.placeId=facility.id;selected=other;renderArrivalActivity();if($('arrival-activity').hidden||!$('arrival-activity').title.includes(facility.name))throw Error('Arrival icon must use the actual destination rather than the selected place');
+  let opened=null;action=async(kind,payload)=>{if(kind!=='activity')throw Error('Unexpected icon action');opened=payload.id;game.activity={placeId:payload.id};return true;};
+  await $('arrival-activity').onclick();if(opened!==facility.id||tab!=='nearby'||selected.id!==facility.id||$('activity-panel').hidden)throw Error('Arrival shortcut must open the arrived facility directly');
+  game.travel={};renderArrivalActivity();if(!$('arrival-activity').hidden)throw Error('Activity icon stays visible after departure');opened=null;await openArrivedActivity();if(opened)throw Error('Travelling shortcut must not open a facility');
+  game.travel=null;game.battle={};renderArrivalActivity();if(!$('arrival-activity').hidden)throw Error('Activity icon visible during battle');
+ }finally{game=saved;selected=oldSelected;action=oldAction;showTab('map');}
+ })()`,context);
  const stableWallet=nodes.get('wallet').children[0],stablePanel=nodes.get('panel-battle').children[0];
  const stableSearch=nodes.get('search-toggle').textContent,stableAuto=nodes.get('auto-toggle').textContent;
  control.pauseSync=true;const quiet=vm.runInContext("action('sync')",context);
