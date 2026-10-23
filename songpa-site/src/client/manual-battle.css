@@ -1,0 +1,52 @@
+/* Two fixed battle layouts, scaled only by the enclosing game canvas. */
+.game-window #panel-battle{padding:0;overflow:hidden}
+.turn-battle{height:100%;display:grid;grid-template-rows:30px minmax(0,1fr);color:#253b38;background:#f0eacc;font-family:NeoDGM,monospace}
+.turn-header{display:flex;align-items:center;justify-content:space-between;padding:3px 8px;background:#173f35;color:#f6edca;font-size:11px;gap:6px}
+.turn-header button{font:11px NeoDGM;padding:3px 6px;min-height:23px;background:#e8e4be;color:#183b30;border:1px solid #8fa56d}
+.turn-body{display:grid;grid-template-rows:290px minmax(0,1fr);min-height:0}
+.turn-stage{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(#c0dfd3 0 48%,#91b879 49% 51%,#b7cc88 52% 100%)}
+.turn-stage::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 5px,#ffffff16 5px 6px);pointer-events:none}
+.turn-platform{position:absolute;border-radius:50%;background:#6e9859;border:4px solid #9fbb71;box-shadow:0 5px 0 #739650}
+.turn-platform-enemy{right:5px;top:137px;width:145px;height:27px}
+.turn-platform-ally{left:-20px;bottom:-2px;width:195px;height:40px;background:#668c51}
+.turn-mon{position:absolute;display:grid;place-items:center;z-index:2;width:128px;height:128px}
+.turn-mon img,.turn-back-canvas{width:128px;height:128px;max-width:none;image-rendering:pixelated;object-fit:contain}
+.turn-mon-enemy{right:8px;top:40px}.turn-mon-ally{left:8px;bottom:0}
+.turn-info{position:absolute;z-index:3;width:170px;box-sizing:border-box;background:#fbf7d9;border:3px solid #446453;border-radius:3px 3px 12px 3px;box-shadow:3px 3px #3a544577;padding:6px 8px}
+.turn-info-enemy{left:8px;top:12px}.turn-info-ally{right:8px;bottom:12px}
+.turn-info-heading{display:flex;align-items:start;justify-content:space-between;gap:5px;font-size:12px;line-height:1.2}
+.turn-info-heading strong{overflow-wrap:anywhere;font-weight:400;max-width:110px}.turn-info-heading span{white-space:nowrap;font-size:11px}
+.turn-info small{display:block;font-size:10px;line-height:1.3;min-height:0;color:#263d32}.turn-info small:empty{display:none}
+.turn-info progress{appearance:none;display:block;width:100%;height:8px;margin:4px 0 1px;background:#476455;border:1px solid #476455;border-radius:3px;overflow:hidden}
+.turn-info progress::-webkit-progress-bar{background:#d6d5b0}.turn-info progress::-webkit-progress-value{background:#41ae75}.turn-info progress::-moz-progress-bar{background:#41ae75}
+.turn-info progress[data-tone="warning"]::-webkit-progress-value{background:#edc04f}.turn-info progress[data-tone="danger"]::-webkit-progress-value{background:#db6051}
+.turn-hp-number{text-align:right}.turn-info .turn-exp{height:4px;margin-top:4px;border:0}.turn-exp::-webkit-progress-value{background:#65abc2!important}
+.turn-effects{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;image-rendering:pixelated}
+.turn-controls{display:flex;flex-direction:column;min-height:0;gap:0;background:#eee9cc;border-top:4px solid #4b695c;padding:8px}
+.turn-message{flex:none;min-height:52px;margin:0 0 8px;padding:10px;box-sizing:border-box;border:3px double #769489;background:#173f3e;color:#fff4cc;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.turn-choices{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px;overflow:auto;padding:2px}
+.turn-choices.turn-command-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.game-window #panel-battle .turn-choices button{flex:none;min-height:40px;background:#fff8db;color:#263d38;border:2px solid #6c8070;box-shadow:inset 0 0 0 2px #fffdf0;font:13px NeoDGM;padding:7px 8px;line-height:1.3;white-space:normal;overflow-wrap:anywhere;text-align:left}
+.turn-choices button:hover,.turn-choices button:focus-visible{outline:2px solid #c38c49;outline-offset:-4px}
+.game-window #panel-battle .turn-command-grid button{font-size:18px;min-height:52px}
+.turn-choices button small{display:block;font-size:10px;color:#536a59;margin-top:4px;line-height:1.3}
+.turn-choices .manual-moves{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+.turn-choices button:disabled{opacity:.45;cursor:default}
+.game-window[data-layout="landscape"] .turn-body{grid-template-rows:1fr;grid-template-columns:440px minmax(0,1fr)}
+[data-layout="landscape"] .turn-mon-enemy{top:6px;right:14px;width:112px;height:112px}
+[data-layout="landscape"] .turn-mon-enemy img{width:112px;height:112px}
+[data-layout="landscape"] .turn-platform-enemy{top:100px;right:0}
+[data-layout="landscape"] .turn-info-ally{bottom:8px;right:12px}
+[data-layout="landscape"] .turn-controls{border-top:0;border-left:4px solid #4b695c;padding:6px}
+[data-layout="landscape"] .turn-message{min-height:45px;font-size:12px;padding:6px;margin-bottom:5px}
+[data-layout="landscape"] .turn-command-grid{gap:6px}
+.game-window[data-layout="landscape"] #panel-battle .turn-command-grid button{min-height:42px;font-size:16px}
+.game-window[data-layout="landscape"] #panel-battle .turn-choices button{padding:5px;min-height:30px;font-size:11px}
+[data-layout="landscape"] .turn-choices button small{font-size:9px;margin-top:2px}
+
+/* Keep the battle-entry action reachable inside the short landscape map. */
+.game-window .wild-info-popup{top:8px!important;left:50%!important;bottom:auto!important;transform:translateX(-50%)!important;width:228px;z-index:12}
+.wild-info-popup .maplibregl-popup-tip{display:none}
+.wild-info-popup .wild-popup{font:12px/1.4 NeoDGM,monospace}
+.wild-info-popup .wild-popup p{margin:6px 0}
+.wild-info-popup .wild-popup button{min-height:32px;width:100%;font:12px NeoDGM;padding:5px}

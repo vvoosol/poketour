@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
+import { build as bundle } from 'esbuild';
 import { projectRoot, projectPath, entryHtml } from './paths.mjs';
 
 export async function build() {
@@ -16,8 +17,9 @@ export async function build() {
   fs.cpSync(projectPath('src/client'), projectPath('dist/client'), { recursive: true });
   fs.cpSync(projectPath('src/platform'), projectPath('dist/client/platform'), { recursive: true });
   fs.cpSync(projectPath('src/shared'), projectPath('dist/client/shared'), { recursive: true });
-  fs.copyFileSync(entryHtml, projectPath('dist/client/index.html'));
-  fs.writeFileSync(projectPath('dist/client/runtime-config.js'), 'window.POKETOUR_CONFIG = Object.freeze({storageMode:"browser",apiBaseUrl:"",allowDebug:false});\n');
+  const html = fs.readFileSync(entryHtml, 'utf8').replace(/  <base href="\.\/assets\/" data-poketour-assets>\r?\n/, '');
+  fs.writeFileSync(projectPath('dist/client/index.html'), html);
+  fs.writeFileSync(projectPath('dist/client/runtime-config.js'), 'window.POKETOUR_CONFIG = Object.freeze({storageMode:"browser",apiBaseUrl:"",allowDebug:true});\n');
   fs.writeFileSync(projectPath('dist/client/.nojekyll'), '');
   fs.cpSync(projectPath('src/shared'), projectPath('dist/server/shared'), { recursive: true });
   fs.writeFileSync(projectPath('dist/server/worker.js'), fs.readFileSync(projectPath('worker/index.js'), 'utf8').replaceAll('../src/shared/', './shared/'));
@@ -31,6 +33,14 @@ export async function build() {
     await import(`./prepare-routing.mjs?build=${stamp}`);
   } finally { process.chdir(oldCwd); }
   fs.copyFileSync(projectPath('dist/server/data/foot-graph.json'), projectPath('dist/client/foot-graph.json'));
+  const fileData = Object.fromEntries(['pokemon-data.json', 'game-settings.json', 'world-seed.json', 'facility-evidence.json', 'foot-graph.json', 'songpa-osm.json', 'base-style.json'].map(name => [name, fs.readFileSync(projectPath('dist/client', name), 'utf8')]));
+  await bundle({
+    entryPoints: [projectPath('src/platform/file-runtime.mjs')],
+    outfile: projectPath('dist/client/file-mode.js'),
+    bundle: true, format: 'iife', platform: 'browser', target: 'es2022',
+    define: { 'import.meta.url': 'document.baseURI' },
+    banner: { js: 'window.POKETOUR_FILE_DATA=' + JSON.stringify(fileData) + ';' },
+  });
   for (const name of ['pokemon-data.json', 'game-settings.json', 'world-seed.json', 'facility-evidence.json']) {
     fs.copyFileSync(projectPath('dist/client', name), projectPath('dist/server/data', name));
   }
@@ -62,6 +72,11 @@ export default createWorker({pokemonData,settings,seed,evidence,loadFootGraph:()
     assets, serverFiles,
   };
   fs.writeFileSync(projectPath('dist/build-report.json'), JSON.stringify(report, null, 2));
+  // Keep the repository root directly publishable without a hosting build step.
+  const uploadAssets = path.resolve(path.dirname(entryHtml), 'assets');
+  if (path.dirname(uploadAssets) !== path.dirname(entryHtml) || path.basename(uploadAssets) !== 'assets') throw Error('Unsafe upload path');
+  fs.mkdirSync(uploadAssets, { recursive: true });
+  fs.cpSync(projectPath('dist/client'), uploadAssets, { recursive: true });
   console.log(`Built ${report.clientFiles} client files; server JS ${report.serverJavaScriptBytes} bytes (${report.serverJavaScriptGzipBytes} bytes gzip, per-file sum).`);
   return report;
 }

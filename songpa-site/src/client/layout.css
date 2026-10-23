@@ -1,0 +1,135 @@
+/* Exactly two logical canvases. Only the enclosing transform fits the viewport. */
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+.game-stage{position:fixed;inset:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);overflow:hidden}
+.game-window{position:absolute;left:50%;top:50%;width:360px;height:800px;aspect-ratio:9/20;transform:translate(-50%,-50%) scale(var(--game-scale,1));transform-origin:center;display:block;container-type:normal;border:0;overflow:hidden;visibility:hidden;--head-h:48px;--nav-h:72px}
+.game-window[data-fitted="true"]{visibility:visible}
+.game-window[data-layout="landscape"]{width:800px;height:360px;aspect-ratio:20/9}
+.game-window .workspace{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;overflow:hidden}
+.game-window .explorer{position:absolute;inset:0;display:block;overflow:visible;border:0;pointer-events:none}
+.game-window .explorer>*{pointer-events:auto}
+.game-window .topbar{inset:8px 12px auto;height:48px;min-height:0;gap:8px;padding:0;align-items:stretch}
+.game-window .brand{width:104px;flex:none;padding:6px;gap:6px}
+.game-window .brand .pixel-icon{width:26px;height:26px;flex:none}
+.game-window h1{font-size:16px}.game-window .brand p{font-size:8px;letter-spacing:1px}
+.resource-bar{font-size:14px;padding:5px;gap:5px;overflow:hidden}.resource-bar>span:not(.pixel-icon){overflow:hidden;text-overflow:ellipsis}
+.resource-bar .pixel-icon{width:18px;height:18px;flex:none}.resource-bar .icon-badge{margin-left:3px}
+.quick-bag{width:48px;flex:none;padding:9px}.quick-bag .pixel-icon{width:26px;height:26px}
+.game-window .map-area{inset:184px 12px 112px;width:auto;height:auto;min-height:0;border:2px solid #52735a}
+.game-window .journey-hud{top:64px;left:12px;width:336px;height:72px;padding:10px;gap:8px}
+.journey-hud>.pixel-icon{width:24px;height:32px;flex:none}.journey-main small,.journey-arrival small{font-size:11px;margin-bottom:6px}
+.journey-main strong{font-size:22px}.journey-arrival{width:40%;padding-left:10px}.journey-arrival strong{font-size:16px}.journey-chevron{font-size:24px}
+#journey-actions{top:144px;left:12px;right:12px;height:32px;gap:8px}
+#journey-actions button{flex:1;min-height:32px;margin:0;padding:4px 8px;font-size:12px}
+.game-window .game-tabs{inset:auto 0 0;height:72px;min-height:0;padding:4px;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:1fr;gap:0}
+.game-tabs button{font-size:12px;gap:4px;padding:3px;min-height:0;min-width:0}.game-tabs .pixel-icon{width:28px;height:28px}
+.game-window .status-toast{inset:auto 12px 76px;height:28px;padding:5px 8px;margin:0;font-size:11px;line-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:none;text-align:left}
+.map-tools{left:10px;bottom:34px;top:auto;gap:8px}.map-tools button{width:40px;height:40px;min-height:40px;padding:7px}
+.map-controls{right:10px;bottom:34px;top:auto;gap:5px}.map-controls button{width:32px;height:32px;min-height:32px}
+.game-window .map-pin{position:relative;width:20px;height:20px;font-size:12px;border-width:1px!important;box-shadow:1px 1px #163d2d!important}
+.map-pin::before{content:'';position:absolute;inset:-7px}
+.game-window .pin-label{max-width:110px;margin-top:3px;padding:2px 4px;font-size:8px;line-height:1.2;border-width:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:1px 1px #153521aa}
+.maplibregl-ctrl-bottom-left{bottom:0;left:0}.maplibregl-ctrl-bottom-right{bottom:0;right:0}
+#site-info>.menu-map-credits{display:block;margin:16px 0 0;font-size:10px;line-height:1.6;color:var(--muted)}
+#site-info>.menu-map-credits a{color:inherit}
+.tutorial-guide{font-size:12px;line-height:1.6;padding:8px 0;border-bottom:1px solid #527347;margin-bottom:12px}
+.tutorial-guide ol{margin:8px 0;padding-left:20px}.tutorial-guide li{margin-bottom:8px}.tutorial-guide p{color:var(--muted);font-size:11px}
+.goal-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;padding:10px;margin:8px 0;border:1px solid #527347;background:#173c2e}
+.goal-card strong,.goal-card p,.goal-card button{grid-column:1/-1}.goal-card strong{font-size:13px}.goal-card p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}.goal-card small{font-size:10px;white-space:nowrap}.goal-card progress{width:100%;align-self:center}
+.goal-card button{width:100%;white-space:normal}
+.box-panel>summary{min-height:44px;padding:12px 0;font-size:15px;color:var(--lime)}
+.box-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.box-controls input{grid-column:1/-1}.box-controls select{font-size:11px;min-height:40px}
+.box-panel>button{width:100%;min-height:40px}
+.map-error{top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 24px);max-height:calc(100% - 24px);overflow:auto;padding:12px;font-size:12px;line-height:1.5}
+.game-window #starter-panel{top:auto;bottom:112px;left:12px;right:12px;height:192px;margin:0;padding:10px;display:block;overflow:auto}
+#starter-panel h3{font-size:14px;margin:0 0 10px}#starter-choices{gap:6px}.starter-card{padding:6px 3px;min-width:0}
+.starter-card img{display:block;margin:0 auto;width:58px;height:58px}.starter-card h4{font-size:12px;margin:3px 0 6px}.starter-card button{min-height:36px;font-size:11px;padding:5px 2px}
+.workspace[data-screen="map"]:has(#starter-panel:not([hidden])) .map-area{bottom:312px}
+.game-window #panel-team,.game-window #panel-battle,.game-window #panel-log,.game-window #panel-dex,.game-window #panel-settings,.game-window #panel-bag,.game-window #panel-shop,.game-window #map-explore,.game-window .workspace[data-screen="settings"] #panel-settings{inset:64px 12px 112px;height:auto;min-height:0;max-height:none;margin:0;padding:12px;overflow:auto}
+.game-window .explorer h3{font-size:17px;line-height:1.4}.inventory-grid,.shop-grid,#dex-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.menu-grid button{min-height:64px;font-size:12px}
+.pokemon-summary{min-width:0}.pokemon-summary>div{min-width:0}.pokemon-summary h4{overflow-wrap:anywhere}.pokemon-summary img{width:64px;height:64px;flex:none}
+.game-window .location-bar{flex-direction:row;gap:8px}.game-window .location-actions{flex:none;gap:6px}.game-window #control-panel #gps-status{max-width:180px}
+.game-window #map-explore{display:flex;flex-direction:column;overflow:hidden;gap:8px}
+#map-explore .filters{flex:none;grid-template-columns:repeat(5,minmax(0,1fr));padding:0}#map-explore .filters button{min-width:0;font-size:10px;padding:4px 2px;gap:2px}
+#map-explore .list-summary{flex:none;margin:0;font-size:11px}#map-explore .place-list{order:1;flex:1;min-height:80px;grid-template-columns:1fr;padding:0;gap:6px;overflow:auto}
+#map-explore .place{min-height:52px;padding:7px;gap:8px}.place>span{min-width:0}#map-explore .place-name{font-size:12px}#map-explore .place-sub{font-size:10px}
+.game-window #detail,.game-window #activity-panel{position:relative;inset:auto;order:2;flex:0 1 auto;min-height:0;max-height:58%;overflow:auto;margin:0;padding:12px;box-shadow:none}
+.game-window #detail h3{padding-right:22px;font-size:16px}#detail .close{width:32px;height:32px;right:4px;top:4px}
+#map-explore:has(#activity-panel:not([hidden])) #detail{display:none}
+
+/* Landscape: fixed map column, fixed information column, right navigation rail. */
+[data-layout="landscape"] .topbar{right:88px}
+[data-layout="landscape"] .brand{width:140px}
+[data-layout="landscape"] .resource-bar{justify-content:flex-end;padding-right:16px}
+[data-layout="landscape"] .map-area{inset:64px 212px 52px 12px}
+[data-layout="landscape"] .workspace[data-screen="map"]:has(#starter-panel:not([hidden])) .map-area{inset:64px 212px 196px 12px}
+[data-layout="landscape"] .journey-hud{top:64px;left:600px;width:112px;height:152px;padding:12px;flex-direction:column;align-items:stretch;justify-content:center;gap:12px}
+[data-layout="landscape"] .journey-hud>.pixel-icon{display:none}
+[data-layout="landscape"] .journey-main{flex:none;width:100%}
+[data-layout="landscape"] .journey-main strong{font-size:20px}
+[data-layout="landscape"] .journey-arrival{width:100%;border-left:0;border-top:1px solid #4e734e;padding:12px 0 0}
+[data-layout="landscape"] .journey-arrival strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis}
+[data-layout="landscape"] .journey-chevron{position:absolute;right:7px;top:7px;font-size:18px}
+[data-layout="landscape"] #journey-actions{top:224px;left:600px;right:88px;height:84px;flex-direction:column}
+[data-layout="landscape"] #journey-actions button{min-height:38px;font-size:11px;padding:4px}
+[data-layout="landscape"] .game-tabs{inset:0 0 0 auto;width:76px;height:360px;grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr));padding:4px;border-top:0;border-left:4px ridge #64835e;box-shadow:none}
+[data-layout="landscape"] .game-tabs button{border-right:0;border-bottom:1px dashed #3a5a42}
+[data-layout="landscape"] .game-tabs button[aria-pressed="true"]{border-right:0}
+[data-layout="landscape"] .status-toast{inset:auto 88px 12px 12px;height:28px}
+[data-layout="landscape"] #starter-panel{top:auto;left:12px;right:212px;bottom:52px;height:136px;padding:6px}
+[data-layout="landscape"] #starter-panel h3{font-size:12px;margin-bottom:5px}
+[data-layout="landscape"] #starter-choices{gap:4px}
+[data-layout="landscape"] .starter-card{padding:2px;display:grid;grid-template-columns:28px minmax(0,1fr);align-items:center}
+[data-layout="landscape"] .starter-card img{width:28px;height:28px}
+[data-layout="landscape"] .starter-card h4{font-size:9px;line-height:11px;margin:0;overflow-wrap:anywhere}
+[data-layout="landscape"] .starter-card button{grid-column:1/-1;font-size:10px;min-height:40px;padding:3px 1px}
+.game-window[data-layout="landscape"] #panel-team,.game-window[data-layout="landscape"] #panel-battle,.game-window[data-layout="landscape"] #panel-log,.game-window[data-layout="landscape"] #panel-dex,.game-window[data-layout="landscape"] #panel-settings,.game-window[data-layout="landscape"] #panel-bag,.game-window[data-layout="landscape"] #panel-shop,.game-window[data-layout="landscape"] #map-explore,.game-window[data-layout="landscape"] .workspace[data-screen="settings"] #panel-settings{inset:64px 88px 52px 12px}
+[data-layout="landscape"] .inventory-grid,[data-layout="landscape"] .shop-grid,[data-layout="landscape"] #dex-list{grid-template-columns:repeat(4,minmax(0,1fr))}
+[data-layout="landscape"] .menu-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+[data-layout="landscape"] #panel-battle .battle-field{min-height:150px}
+[data-layout="landscape"] #map-explore:has(#detail:not([hidden])),[data-layout="landscape"] #map-explore:has(#activity-panel:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr)}
+[data-layout="landscape"] #map-explore .filters{grid-column:1;grid-row:1}
+[data-layout="landscape"] #map-explore .list-summary{grid-column:1;grid-row:2}
+[data-layout="landscape"] #map-explore .place-list{grid-column:1;grid-row:3}
+[data-layout="landscape"] #detail,[data-layout="landscape"] #activity-panel{grid-column:2;grid-row:1/4;max-height:100%;height:100%}
+
+/* Test controls and full text within the two fixed canvases. */
+.game-window .map-tools{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.game-window #test-spawn{width:48px;height:42px;min-height:42px;padding:3px;font-size:10px;line-height:15px;white-space:normal}
+.game-window .pin-label{position:absolute;box-sizing:border-box;max-width:112px;margin:0;padding:3px 4px;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;font-size:8px;line-height:11px;text-align:center;pointer-events:none}
+.game-window .marker-wrap{width:20px}
+.game-window .journey-main strong,.game-window .journey-arrival strong{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.25}
+.game-window .journey-main small,.game-window .journey-arrival small{white-space:normal;line-height:1.3}
+[data-layout="landscape"] .journey-hud{padding:10px;gap:8px}
+[data-layout="landscape"] .journey-main strong{font-size:18px}
+[data-layout="landscape"] .journey-hud[data-content="idle"] .journey-main strong{font-size:15px}
+[data-layout="landscape"] .journey-arrival strong{font-size:13px}
+.game-window .status-toast{height:auto;min-height:28px;max-height:40px;white-space:normal;overflow:auto;line-height:15px}
+.game-window #route-result,.game-window .place-name,.game-window #detail-name{white-space:normal;overflow-wrap:anywhere;text-overflow:clip}
+
+/* Field combat uses the same logical map coordinates in both orientations. */
+#map-battle-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:7}
+.map-health{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);width:58px;padding:2px;background:#09271ee8;color:#fff6cb;border:1px solid #7e9c60;pointer-events:none;line-height:9px}
+.map-health progress{display:block;width:100%;height:4px;accent-color:#bcf252}
+.map-health small{display:block;font-size:7px;text-align:center;white-space:nowrap;line-height:9px}
+.companion-health{bottom:32px}
+.field-wild.in-battle{outline:2px solid #f0dc75;outline-offset:1px}
+.map-attack-beam{position:absolute;height:3px;background:#f4e384;transform-origin:left center;animation:map-strike .8s both}
+.map-attack-number{position:absolute;min-width:30px;font-size:12px;color:#fff2b0;text-shadow:1px 1px #102820;animation:map-damage 1.6s both}
+@keyframes map-strike{0%{opacity:0}15%,65%{opacity:1}100%{opacity:0}}
+@keyframes map-damage{0%{opacity:0;translate:0 0}15%{opacity:1}100%{opacity:0;translate:0 -20px}}
+.manual-moves{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.manual-moves button{white-space:normal;overflow-wrap:anywhere;min-height:48px}
+#reset-confirmation{margin-top:12px;padding:10px;border:2px solid #bb7956;line-height:1.6}
+#reset-confirm{background:#713b2c;color:#fff3cf}
+#spawn-status{font-size:11px;line-height:1.5;color:var(--lime)}
+
+.move-order-row{display:flex;align-items:center;gap:6px;margin:6px 0}.move-order-row span{flex:1;min-width:0;font-size:12px}.move-order-row button{min-width:36px}
+
+/* Local sprite canvases animate within MapLibre's positioning wrapper. */
+.map-sprite-host{overflow:visible!important;isolation:isolate}
+.field-wild.map-sprite-host{animation:none!important}
+.map-sprite-host .companion-sprite{animation:none!important}
+.map-pokemon-canvas{position:absolute;left:50%;top:50%;width:112px;height:112px;max-width:none;max-height:none;transform:translate(-50%,-50%);image-rendering:pixelated;pointer-events:none;z-index:1}
+.map-sprite-host .map-health{z-index:3}
+.map-effects-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}

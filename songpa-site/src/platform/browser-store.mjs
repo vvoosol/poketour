@@ -27,9 +27,9 @@ export async function createBrowserStore({
     if (!response.ok) throw Error(name + ' 불러오기 실패');
     return response.json();
   };
-  const [data, settings, seed, evidence] = await Promise.all(['pokemon-data.json', 'game-settings.json', 'world-seed.json', 'facility-evidence.json'].map(asset));
+  const [data, settings, seed, evidence, localWorld] = await Promise.all(['pokemon-data.json', 'game-settings.json', 'world-seed.json', 'facility-evidence.json', 'songpa-osm.json'].map(asset));
   const world = createWorld(seed, evidence);
-  world.world.status = '기본 지도 준비됨 · 상세 경계 확인 전';
+  world.ingest(localWorld);
   const engine = createEngine(data, settings, world.world);
   const opening = indexedDB.open(dbName, 1);
   opening.onupgradeneeded = () => {
@@ -44,6 +44,8 @@ export async function createBrowserStore({
   let graphPromise;
   let worldPromise;
   const router = () => graphPromise ||= asset('foot-graph.json').then(createFootRouter).catch(error => { graphPromise = null; throw error; });
+  // Reuse graph loading while the player chooses a destination.
+  void router().catch(() => {});
   const read = async (store, key) => {
     const transaction = db.transaction(store);
     return requestResult(transaction.objectStore(store).get(key));
@@ -72,7 +74,7 @@ export async function createBrowserStore({
     return !conflict;
   };
   async function loadWorld() {
-    if (cachedWorld) return world.world;
+    if (world.world.features.length) return world.world;
     if (!worldPromise) worldPromise = (async () => {
       try {
         const raw = await fetchWorld();
@@ -116,7 +118,7 @@ export async function createBrowserStore({
         if (typeof options.body !== 'string' || options.body.length > 16000) return json({error:'요청 크기 오류'},413);
         let input;
         try { input = JSON.parse(options.body); } catch { return json({error:'요청 형식 오류'},400); }
-        if (!Number.isInteger(input.revision) || typeof input.requestId !== 'string' || input.requestId.length > 100) return json({error:'요청 번호 오류'},400);
+        if (!Number.isSafeInteger(input.revision) || input.revision < 0 || typeof input.requestId !== 'string' || !input.requestId.trim() || input.requestId.length > 100) return json({error:'요청 번호 오류'},400);
         const {state, revision} = current;
         if (state.receipts?.includes(input.requestId)) return json({...current,replayed:true});
         if (input.revision !== revision && input.action !== 'sync') return json({...current,error:'다른 탭에서 저장이 변경되었습니다. 최신 상태를 확인하세요.'},409);
@@ -129,14 +131,14 @@ export async function createBrowserStore({
           let plan;
           if (payload.fieldWildId) {
             if (payload.mode !== 'walk') throw Error('야생 개체에게는 도보로 이동하세요.');
-            const wild = state.fieldWilds.find(w => w.id === payload.fieldWildId && w.expiresAt > t);
+            const wild = state.fieldWilds.find(w => w.id === payload.fieldWildId && (w.expiresAt > t || engine.fieldWildProtected(state,w)));
             if (!wild) throw Error('대상이 이미 사라졌습니다.');
             plan = await routePlan(engine,state,{id:wild.id,name:data.species[wild.speciesId].name,coord:engine.fieldPosition(wild,t),fieldWildId:wild.id},'walk',await router());
             for (const old of state.fieldWilds) if (old.pursued && old.id !== wild.id) { old.pursued=false; old.moveUntil=t; }
             state.huntTargetId = wild.id;
             const coord = engine.fieldPosition(wild,t);
             Object.assign(wild,{coord,from:coord,to:coord,moveAt:t,moveUntil:0,pursued:true});
-          } else plan = await routePlan(engine,state,payload.id,payload.mode,await router());
+          } else plan = await routePlan(engine,state,payload.id,payload.mode,payload.mode==='air'?null:await router());
           state.routePlan = {...plan,token:crypto.randomUUID(),expiresAt:t+120000};
         } else if (input.action === 'start') {
           if (!state.routePlan || payload.token !== state.routePlan.token || t > state.routePlan.expiresAt) throw Error('경로를 다시 계산하세요.');
@@ -147,7 +149,11 @@ export async function createBrowserStore({
           engine.apply(state,input.action,payload,t);
         }
         state.receipts = [...(state.receipts || []),input.requestId].slice(-40);
-        if (!await commit(state,revision)) return json({...await snapshot(),error:'다른 탭에서 저장이 변경되었습니다. 다시 시도하세요.'},409);
+        if (!await commit(state,revision)) {
+          const latest = await snapshot();
+          if (latest.state.receipts?.includes(input.requestId)) return json({...latest,replayed:true});
+          return json({...latest,error:'다른 탭에서 저장이 변경되었습니다. 다시 시도하세요.'},409);
+        }
         return json({state,revision:revision+1,serverNow:clock(),plan:state.routePlan,worldStatus:world.world.status});
       } catch (error) { return json({error:error.message || '브라우저 저장을 처리하지 못했습니다.'},400); }
     },
@@ -158,11 +164,27 @@ export async function createBrowserStore({
     },
     async restore(backup) {
       if (backup?.format !== 'poketour-backup-v1' || !backup.state || ![2,3,4,5].includes(backup.state.version)) throw Error('지원하지 않는 저장 파일입니다.');
+      const incoming=[...(backup.state.player?.party||[]),...(backup.state.box||[]),...(backup.state.battle?[backup.state.battle.enemy,...(backup.state.battle.queue||[])]:[])];
+      if(incoming.some(p=>!p||p.hpScale!==undefined&&![1,10,100].includes(p.hpScale)))throw Error('저장 파일의 체력 배율이 잘못되었습니다.');
       const state = engine.migrate(structuredClone(backup.state), clock());
       const owned = [...state.player.party,...state.box];
       if (!Number.isFinite(state.player.money) || state.player.money < 0 || state.player.party.length > 6 || owned.some(p=>!data.species[p.speciesId] || !p.uid || !Number.isFinite(p.hp)) || new Set(owned.map(p=>p.uid)).size !== owned.length || Object.values(state.bag).some(n=>!Number.isInteger(n)||n<0)) throw Error('저장 파일의 개체·재화 정보가 잘못되었습니다.');
+      const validPokemon = p => Number.isInteger(p.speciesId) && typeof p.uid === 'string' && p.uid.length <= 100
+        && Number.isInteger(p.level) && p.level >= 1 && p.level <= 100
+        && Number.isFinite(p.xp) && p.xp >= 0 && Number.isFinite(p.maxHp) && p.maxHp > 0 && p.hp >= 0 && p.hp <= p.maxHp
+        && Array.isArray(p.stats) && p.stats.length === 6 && p.stats.every(n=>Number.isFinite(n)&&n>0)
+        && Array.isArray(p.moves) && p.moves.length >= 1 && p.moves.length <= 4
+        && p.moves.every(m=>Number.isInteger(m.id)&&data.moves[m.id]&&Number.isInteger(m.pp)&&m.pp>=0&&m.pp<=data.moves[m.id].pp)
+        && Array.isArray(p.learned) && p.learned.every(id=>Number.isInteger(id)&&data.moves[id]);
+      if (owned.some(p=>!validPokemon(p))) throw Error('저장 파일의 능력치·레벨·기술 정보가 잘못되었습니다.');
+      if(state.battle&&(!validPokemon(state.battle.enemy)||(state.battle.queue||[]).some(p=>!validPokemon(p))||!state.player.party.some(p=>p.uid===state.battle.active)))throw Error('저장 파일의 전투 정보가 잘못되었습니다.');
+      const goalIds = new Set(engine.adventure(state).map(g=>g.id));
+      if (!Array.isArray(state.adventureClaims) || state.adventureClaims.some(id=>!goalIds.has(id)) || new Set(state.adventureClaims).size !== state.adventureClaims.length) throw Error('저장 파일의 모험 보상 정보가 잘못되었습니다.');
       const events = backup.events || state.events;
       if (!Array.isArray(events) || events.length > 100000 || events.some(e=>!Number.isSafeInteger(e.id)||!Number.isFinite(e.at))) throw Error('저장 파일의 기록 정보가 잘못되었습니다.');
+      if (!Number.isSafeInteger(state.seq) || state.seq < 0 || !Number.isFinite(state.simAt)
+        || events.some(e=>e.id<0||e.id>state.seq||typeof e.kind!=='string'||typeof e.msg!=='string')
+        || new Set(events.map(e=>e.id)).size !== events.length) throw Error('저장 파일의 기록 번호가 잘못되었습니다.');
       const current = await snapshot();
       const transaction = db.transaction(['saves','events'],'readwrite');
       const done = transactionDone(transaction);
@@ -176,6 +198,25 @@ export async function createBrowserStore({
       };
       await done;
       if (conflict) throw Error('다른 탭에서 저장이 변경되었습니다. 다시 불러와 주세요.');
+      return snapshot();
+    },
+    async reset({revision,requestId} = {}) {
+      if(!Number.isSafeInteger(revision)||revision<0||typeof requestId!=='string'||!requestId.trim()||requestId.length>100)throw Error('초기화 요청 번호 오류');
+      const fresh=engine.migrate(null,clock(),196912);
+      engine.apply(fresh,'demo',{},clock());
+      fresh.receipts=[requestId];
+      const transaction=db.transaction(['saves','events'],'readwrite'),done=transactionDone(transaction);
+      let conflict=false;
+      const saves=transaction.objectStore('saves');
+      saves.get('current').onsuccess=event=>{
+        const current=event.target.result;
+        if(current?.state.receipts?.includes(requestId))return;
+        if((current?.revision||0)!==revision){conflict=true;return;}
+        saves.put({state:fresh,revision:revision+1},'current');
+        transaction.objectStore('events').clear();
+      };
+      await done;
+      if(conflict)throw Error('다른 탭에서 저장이 변경되었습니다. 다시 불러온 뒤 초기화하세요.');
       return snapshot();
     },
     close: () => db.close(),

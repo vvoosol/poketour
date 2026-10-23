@@ -8,12 +8,12 @@ window.createPoketourPlatform = function createPoketourPlatform(overrides = {}) 
   const base = (config.apiBaseUrl || '').replace(/\/$/, '');
   const browserMode = config.storageMode === 'browser';
   let runtime;
-  const browserStore = () => runtime ||= (overrides.browserStore ? Promise.resolve(overrides.browserStore) : import('./browser-store.mjs').then(module => module.createBrowserStore()));
+  const browserStore = () => runtime ||= (overrides.browserStore ? Promise.resolve(overrides.browserStore) : window.PoketourFileRuntime ? window.PoketourFileRuntime.createBrowserStore({allowDebug:config.allowDebug===true}) : import('./browser-store.mjs').then(module => module.createBrowserStore({allowDebug:config.allowDebug===true})));
   if (base && (!/^https:\/\//.test(base) || new URL(base).username || new URL(base).password)) throw Error('API base URL must use HTTPS without embedded credentials.');
   return {
     browserMode,
     saveLabel: browserMode ? '이 브라우저에 저장됨' : '로컬 서버에 저장됨',
-    allowDebug: !browserMode && config.allowDebug !== false,
+    allowDebug: config.allowDebug === true || !browserMode && config.allowDebug !== false,
     apiFetch(path, options) {
       if (!path.startsWith('/api/')) throw Error('Expected an API path');
       if (browserMode) return browserStore().then(store => store.request(path, options));
@@ -26,6 +26,7 @@ window.createPoketourPlatform = function createPoketourPlatform(overrides = {}) 
     },
     backup: () => browserStore().then(store => store.backup()),
     restore: backup => browserStore().then(store => store.restore(backup)),
+    reset: request => browserStore().then(store => store.reset(request)),
     location: {
       available: !!geolocation,
       watchPosition: (...args) => geolocation?.watchPosition(...args),

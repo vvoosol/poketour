@@ -1,0 +1,131 @@
+{
+  "generatedAt": "2026-10-20T07:37:25.383Z",
+  "scenario": "Level 5 starter versus level 5 Rattata, fixed seeds, no auto healing/flee threshold; no external map/GPS. Results are simulation, not device playtests.",
+  "preserved": {
+    "hpMultiplier": 100,
+    "actionSeconds": 6,
+    "nearbyIntervalSeconds": 600,
+    "nearbyChance": 0.7,
+    "rareIntervalSeconds": 1800,
+    "rareChance": 0.25
+  },
+  "battles": [
+    {
+      "policy": "fast",
+      "starter": 749,
+      "seconds": {
+        "count": 12,
+        "min": 540,
+        "median": 552,
+        "p95": 576,
+        "max": 576
+      },
+      "outcomes": {
+        "win": 12,
+        "capture": 0,
+        "wipe": 0,
+        "flee": 0,
+        "timeout": 0
+      }
+    },
+    {
+      "policy": "fast",
+      "starter": 318,
+      "seconds": {
+        "count": 12,
+        "min": 24,
+        "median": 30,
+        "p95": 36,
+        "max": 36
+      },
+      "outcomes": {
+        "win": 12,
+        "capture": 0,
+        "wipe": 0,
+        "flee": 0,
+        "timeout": 0
+      }
+    },
+    {
+      "policy": "fast",
+      "starter": 940,
+      "seconds": {
+        "count": 12,
+        "min": 1734,
+        "median": 1794,
+        "p95": 1818,
+        "max": 1818
+      },
+      "outcomes": {
+        "win": 0,
+        "capture": 0,
+        "wipe": 12,
+        "flee": 0,
+        "timeout": 0
+      }
+    },
+    {
+      "policy": "capture",
+      "starter": 749,
+      "seconds": {
+        "count": 12,
+        "min": 330,
+        "median": 348,
+        "p95": 378,
+        "max": 378
+      },
+      "outcomes": {
+        "win": 0,
+        "capture": 12,
+        "wipe": 0,
+        "flee": 0,
+        "timeout": 0
+      }
+    },
+    {
+      "policy": "capture",
+      "starter": 318,
+      "seconds": {
+        "count": 12,
+        "min": 18,
+        "median": 24,
+        "p95": 42,
+        "max": 42
+      },
+      "outcomes": {
+        "win": 0,
+        "capture": 12,
+        "wipe": 0,
+        "flee": 0,
+        "timeout": 0
+      }
+    },
+    {
+      "policy": "capture",
+      "starter": 940,
+      "seconds": {
+        "count": 12,
+        "min": 1098,
+        "median": 1116,
+        "p95": 1128,
+        "max": 1128
+      },
+      "outcomes": {
+        "win": 0,
+        "capture": 12,
+        "wipe": 0,
+        "flee": 0,
+        "timeout": 0
+      }
+    }
+  ],
+  "firstNearbySpawnSeconds": {
+    "count": 200,
+    "min": 600,
+    "median": 600,
+    "p95": 1800,
+    "max": 2400
+  },
+  "spawnTimeouts": 0,
+  "tuning": "Keep existing HP, action and spawn rules. Add capped one-time exploration/collection rewards: first arrival 200, first win 2 potions, first capture 5 Poke Balls, 5 species 3 Great Balls, 10 species 500, first badge 2 Super Potions. Review battle outcome disparity with real playtests before changing old saves or combat formulas."
+}

@@ -39,7 +39,7 @@
 
 개발 원본은 비공개 `vvoosol/poketour`, 공개 실행 파일은 `vvoosol/poketour-play`로 나눕니다. 공개 저장소에는 API 서버·로컬 DB·비밀값·개발 CSV·내부 문서·원본 Git 이력을 올리지 않습니다. 공개 웹 실행에 필요한 엔진·이미지·게임 데이터는 공개 파일에 포함됩니다.
 
-개발 원본의 작업을 커밋·푸시한 뒤 `npm run deploy:pages`를 실행합니다. 이 명령은 원본이 원격 브랜치와 일치하는지와 빌드 산출물 해시를 검사한 다음 배포 저장소를 갱신합니다. 배포 산출물은 `release.json`에 원본 커밋을 기록합니다. 배포 저장소의 main 루트가 Pages 게시 원본입니다.
+최신 사용자 지시에 따라 에이전트는 로컬 개발·검증과 최상위 index.html 및 assets 갱신만 수행합니다. GitHub 업로드는 사용자가 직접 하며 자동 커밋·푸시·배포는 하지 않습니다. `publish-pages.mjs`는 이전 배포 경로의 도구로 보존하며 현재 작업에서는 실행하지 않습니다.
 
 GitHub Pages는 정적 호스팅이므로 별도 API 런타임이나 D1 바인딩을 사용하지 않습니다. [GitHub Pages 공식 문서](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 

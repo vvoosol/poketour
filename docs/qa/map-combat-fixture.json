@@ -1,0 +1,237 @@
+{
+  "format": "poketour-backup-v1",
+  "exportedAt": 1792646230213,
+  "state": {
+    "version": 5,
+    "mode": "demo",
+    "game": {
+      "coord": [
+        127.109709,
+        37.52623
+      ],
+      "placeId": null
+    },
+    "travel": null,
+    "activity": null,
+    "player": {
+      "party": [
+        {
+          "hpScale": 1,
+          "uid": "p1-2643892",
+          "speciesId": 749,
+          "name": "머드나기",
+          "level": 5,
+          "xp": 125,
+          "iv": 15,
+          "hp": 22,
+          "maxHp": 22,
+          "stats": [
+            22,
+            15,
+            12,
+            10,
+            11,
+            10
+          ],
+          "status": null,
+          "statusTurns": 0,
+          "ability": 20,
+          "moves": [
+            {
+              "id": 189,
+              "pp": 10
+            },
+            {
+              "id": 249,
+              "pp": 15
+            },
+            {
+              "id": 334,
+              "pp": 15
+            }
+          ],
+          "learned": [
+            189,
+            249,
+            334
+          ],
+          "stages": {},
+          "caughtAt": 1792646230213
+        }
+      ],
+      "mounts": [],
+      "money": 2500,
+      "progress": {}
+    },
+    "legacyParty": [],
+    "starter": 749,
+    "bag": {
+      "poke-ball": 25,
+      "great-ball": 5,
+      "potion": 10
+    },
+    "box": [],
+    "badges": [],
+    "zoomUnlocked": [
+      "base"
+    ],
+    "zoom": "base",
+    "settings": {
+      "auto": false,
+      "policy": "capture",
+      "order": [],
+      "capture": "unowned",
+      "targets": [],
+      "balls": [
+        "poke-ball",
+        "great-ball",
+        "ultra-ball"
+      ],
+      "perTarget": 3,
+      "budget": 20,
+      "rareBudget": 5,
+      "rareRate": 45,
+      "emptyAction": "fight",
+      "heal": true,
+      "healLimit": 5,
+      "fleeHp": 0.12,
+      "afterArrival": "search"
+    },
+    "run": {
+      "balls": 0,
+      "heals": 0
+    },
+    "simAt": 1792646230213,
+    "nextEncounter": null,
+    "battle": {
+      "id": "b4",
+      "kind": "wild",
+      "enemy": {
+        "hpScale": 1,
+        "uid": "p3-660311977",
+        "speciesId": 915,
+        "name": "맛보돈",
+        "level": 5,
+        "xp": 125,
+        "iv": 15,
+        "hp": 3,
+        "maxHp": 21,
+        "stats": [
+          21,
+          10,
+          9,
+          9,
+          10,
+          9
+        ],
+        "status": null,
+        "statusTurns": 0,
+        "ability": 165,
+        "moves": [
+          {
+            "id": 33,
+            "pp": 35
+          },
+          {
+            "id": 39,
+            "pp": 30
+          },
+          {
+            "id": 574,
+            "pp": 15
+          }
+        ],
+        "learned": [
+          33,
+          39,
+          574
+        ],
+        "stages": {},
+        "caughtAt": 1792646230213,
+        "shiny": false
+      },
+      "active": "p1-2643892",
+      "nextAt": null,
+      "attempts": 0,
+      "rareAttempts": 0,
+      "turns": 0,
+      "environment": {
+        "habitat": "urban",
+        "place": "지도 모션 검증"
+      },
+      "coord": [
+        127.110259,
+        37.52623
+      ],
+      "startedAt": 1792646230213,
+      "queue": [],
+      "fieldId": "qa-map-wild"
+    },
+    "events": [
+      {
+        "id": 2,
+        "at": 1792646230213,
+        "kind": "starter",
+        "msg": "머드나기와 모험 시작",
+        "coord": [
+          127.109709,
+          37.52623
+        ]
+      },
+      {
+        "id": 5,
+        "at": 1792646230213,
+        "kind": "encounter",
+        "msg": "맛보돈 Lv.5 조우 · 지도 모션 검증",
+        "coord": [
+          127.109709,
+          37.52623
+        ],
+        "habitat": "urban",
+        "species": 915,
+        "level": 5,
+        "fieldId": "qa-map-wild"
+      }
+    ],
+    "seq": 5,
+    "totals": {
+      "starter": 1,
+      "encounter": 1
+    },
+    "rng": 2836018348,
+    "fieldWilds": [],
+    "nextWildSpawn": null,
+    "nextNearbySpawn": 1792646830213,
+    "nextRareSpawn": 1792648030213,
+    "huntTargetId": null,
+    "companionUid": "p1-2643892",
+    "adventureClaims": [],
+    "search": true
+  },
+  "events": [
+    {
+      "id": 2,
+      "at": 1792646230213,
+      "kind": "starter",
+      "msg": "머드나기와 모험 시작",
+      "coord": [
+        127.109709,
+        37.52623
+      ]
+    },
+    {
+      "id": 5,
+      "at": 1792646230213,
+      "kind": "encounter",
+      "msg": "맛보돈 Lv.5 조우 · 지도 모션 검증",
+      "coord": [
+        127.109709,
+        37.52623
+      ],
+      "habitat": "urban",
+      "species": 915,
+      "level": 5,
+      "fieldId": "qa-map-wild"
+    }
+  ]
+}

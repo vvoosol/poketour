@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poketour 전투 동작 미리보기</title>
+<style>body{background:#102b22;color:#f1e8b4;font:16px sans-serif;margin:20px}label{display:inline-block;margin:8px}select,button{font:inherit;padding:8px}canvas{display:block;background:#284c32;max-width:100%;image-rendering:pixelated;border:2px solid #8aa369}p{max-width:650px;line-height:1.6}a{color:#c2ef64}</style>
+<h1>전투 동작 미리보기</h1>
+<p>지도 연결 전 확인용입니다. 확보한 동작 프레임과 기술 효과를 선택해 볼 수 있습니다.</p>
+<label>포켓몬 <select id="species"><option value="749">머드나기</option><option value="940">찌리비</option><option value="915">맛보돈</option><option value="318">샤프니아 · 기존 이미지 대체</option></select></label>
+<label>동작 <select id="action"><option>Idle</option><option>Walk</option><option>Attack</option><option>Shoot</option><option>Hurt</option><option>Faint</option></select></label>
+<label>방향 <select id="direction"><option value="0">정면</option><option value="2">오른쪽</option><option value="4">뒷모습</option><option value="6">왼쪽</option></select></label>
+<label>기술 효과 <select id="effect"><option value="33">몸통박치기</option><option value="10">할퀴기</option><option value="52">불꽃세례</option><option value="55">물대포</option><option value="22">덩굴채찍</option><option value="84">전기쇼크</option></select></label>
+<button id="replay">다시 재생</button><canvas id="preview" width="560" height="260" aria-label="포켓몬 동작과 기술 효과 미리보기"></canvas>
+<p id="status" role="status"></p><p>지도용 방향 스프라이트입니다. 본가 전투용 전용 뒷모습 자료는 아직 포함하지 않았습니다. 전용 기절 시트는 피격 동작과 사라짐으로 대체합니다.</p>
+<p><a href="./CREDITS.html">제작자·원본·사용 조건</a> · <a href="../index.html">게임으로 돌아가기</a></p>
+<script src="./manifest.js"></script><script src="../pokemon-animator.js"></script><script src="../move-effects.js"></script><script src="./preview.js"></script>
+</html>
