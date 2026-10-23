@@ -45,5 +45,24 @@ globalThis.PoketourMoveEffects = (()=>{
     if(effect.status){ctx.globalAlpha=1-frame.progress;ctx.strokeRect(from.x-10-frame.progress*8,from.y-10-frame.progress*8,20+frame.progress*16,20+frame.progress*16);}
     ctx.restore();return frame;
   }
-  return {select,sample,draw,moves,definitions};
+  // Shared, presentation-only capture timeline; the engine already decided
+  // success. No random roll or inventory change belongs in an animation.
+  function captureSample(elapsed,from,to,success){
+    const t=Math.max(0,elapsed),flight=clamp(t/600),result=t>=1750;
+    return {x:from.x+(to.x-from.x)*flight+(t>=850&&!result?Math.sin((t-850)/65)*4:0),
+      y:from.y+(to.y-from.y)*flight-Math.sin(flight*Math.PI)*50,
+      enemyOpacity:t<600?1:t<850?1-clamp((t-600)/250):result&&!success?clamp((t-1750)/200):0,
+      phase:t<600?'throw':t<850?'absorb':!result?'shake':success?'caught':'escaped',
+      result,success,done:t>=2600};
+  }
+  function drawCapture(ctx,elapsed,from,to,success,ball='poke-ball'){
+    const f=captureSample(elapsed,from,to,success),x=Math.round(f.x),y=Math.round(f.y);
+    ctx.save();ctx.fillStyle='#132b26';ctx.fillRect(x-8,y-8,16,16);
+    ctx.fillStyle=ball==='great-ball'?'#4985ed':ball==='ultra-ball'?'#e6c74b':'#ed6152';ctx.fillRect(x-6,y-6,12,6);
+    ctx.fillStyle='#fff5d7';ctx.fillRect(x-6,y+1,12,5);ctx.fillRect(x-2,y-2,4,4);
+    if(f.phase==='caught'){ctx.fillStyle='#d8ff6c';for(const dx of [-15,0,15]){ctx.fillRect(x+dx-1,y-21,3,9);ctx.fillRect(x+dx-4,y-18,9,3);}}
+    if(f.phase==='escaped'){ctx.strokeStyle='#fff5d7';ctx.lineWidth=2;ctx.strokeRect(x-14,y-14,28,28);}
+    ctx.restore();return f;
+  }
+  return {select,sample,draw,captureSample,drawCapture,moves,definitions};
 })();

@@ -29,13 +29,18 @@ assert(calls.some(c=>c[0]==='text'&&c[1]==='−10'));
 const sequence=structuredClone(packet);sequence.id=2;sequence.fact.result='miss';calls.length=0;draw(sequence);
 assert.equal(view.actors.get('b').canvas.dataset.action,'Idle');assert(calls.some(c=>c[0]==='text'&&c[1]==='빗나감'));
 assert(!calls.some(c=>c[0]==='effect'),'A missed physical attack has no impact burst');
+for(const success of [false,true]){
+ const capture={id:20,fact:{type:'capture',auto:true,actor:'ally',target:'foe',success,ball:'poke-ball'},scene:{ally:a.model,enemy:b.model},duration:2600,elapsed:1000};
+ calls.length=0;draw(capture);assert.equal(view.actors.get('b').pose.opacity,0);assert(calls.some(c=>c[0]==='effect'),'Capture draws the ball on the map');
+ capture.elapsed=2100;draw(capture);assert.equal(view.actors.get('b').pose.opacity,success?0:1);assert(calls.some(c=>c[0]==='text'&&c[1]===(success?'잡았다!':'잡히지 않았다!')));
+}
 {
  // A camera pan and an enclosing 2x CSS scale must not detach effects/HP.
  const before=view.actors.get('a').point;scale=2;draw(packet);assert.deepEqual(view.actors.get('a').point,before);
  a.element.x+=30;draw(packet);assert.equal(view.actors.get('a').point.x,before.x+30);
- const boxes=draw(packet).boxes.slice(1);assert(boxes.every(p=>p.x>=0&&p.y>=0&&p.x+p.w<=width&&p.y+p.h<=height));
+ const boxes=draw(packet).boxes;
  assert(!boxes.some((p,i)=>boxes.slice(i+1).some(q=>p.x<q.x+q.w&&p.x+p.w>q.x&&p.y<q.y+q.h&&p.y+p.h>q.y)));
- width=576;height=244;draw(packet);assert(view.actors.get('b').label.y+20<=height);
+ width=576;height=244;draw(packet);assert(view.actors.get('b').label,'Visible actor has a local HP label');
 }
 {
  const fallback=actor('fallback',318,250,130);view.bind('fallback',fallback);
@@ -57,7 +62,7 @@ for(const [w,h]of [[336,504],[576,244]])for(const spot of [{x:w/2,y:h/2},{x:6,y:
  for(let time=0;time<=8400;time+=700){
   const out=crowded.render({project:([x,y])=>({x,y}),trainer:spot,viewport:{width:w,height:h,rect:{x:10,y:20,width:w}},time});
   for(const [i,body]of out.actors.entries()){
-   assert(body.point.x>=26&&body.point.x<=w-26&&body.point.y>=30&&body.point.y<=h-26,'Bodies stay inside the fixed map');
+   assert(Math.hypot(body.hostOffset.x,body.hostOffset.y)<450,'Spacing remains local to the geographic anchor');
    assert(Math.hypot(body.point.x-spot.x,body.point.y-spot.y)>=78,'Trainer stays clear');
    for(const other of out.actors.slice(i+1))assert(Math.hypot(body.point.x-other.point.x,body.point.y-other.point.y)>=73,'All six bodies stay separated while strolling');
    assert.equal(body.element.style.transform,'unchanged outer placement','Map placement transform is preserved');
@@ -78,6 +83,24 @@ for(const [w,h]of [[336,504],[576,244]])for(const spot of [{x:w/2,y:h/2},{x:6,y:
  assert(moved&&walked,'Idle Pokémon take short independent walks');assert.equal(JSON.stringify(bodies.map(b=>b.coord)),original,'Display spacing never mutates geographic coordinates');
  crowded.motionQuery={matches:true};const still=()=>crowded.render({project:([x,y])=>({x,y}),trainer:spot,viewport:{width:w,height:h,rect:{x:10,y:20,width:w}},time:clock}).actors.map(a=>({...a.point}));
  const reduced=still();clock+=1100;assert.deepEqual(still(),reduced,'Reduced motion disables idle strolls while retaining separation');
+ // Move every projected geographic anchor, including the trainer, by the same
+ // camera delta. Crossing any edge and returning must preserve marker offsets.
+ const homeOffsets=[...crowded.actors.values()].map(a=>({...a.homeOffset}));
+ let cameraX=0,cameraY=0;
+ const pan=(dx,dy)=>{
+  cameraX+=dx;cameraY+=dy;
+  for(const body of bodies){body.element.x+=dx;body.element.y+=dy;}
+  return crowded.render({project:([x,y])=>({x:x+cameraX,y:y+cameraY}),trainer:{x:spot.x+cameraX,y:spot.y+cameraY},viewport:{width:w,height:h,rect:{x:10,y:20,width:w}},time:clock}).actors;
+ };
+ for(const [dx,dy]of [[-w*2,0],[w*4,0],[-w*2,-h*2],[0,h*4],[0,-h*2]]){
+  const result=pan(dx,dy);
+  for(const [i,body]of result.entries()){
+   assert(Math.hypot(body.homeOffset.x-homeOffsets[i].x,body.homeOffset.y-homeOffsets[i].y)<1e-6,'Camera drag cannot move Pokémon relative to their geographic anchors');
+   assert(Math.hypot(body.point.x-reduced[i].x-cameraX,body.point.y-reduced[i].y-cameraY)<1e-6,'Sprites follow the map rather than staying inside the viewport');
+   if(!body.onScreen)assert.equal(body.health.style.visibility,'hidden','Offscreen HP is not pinned to a screen edge');
+  }
+ }
+ const returned=pan(0,0);for(const [i,body]of returned.entries())assert(Math.hypot(body.point.x-reduced[i].x,body.point.y-reduced[i].y)<1e-6,'Returning the camera restores the original visual location');
 }
 const read=n=>JSON.parse(fs.readFileSync('dist/client/'+n)),D=read('pokemon-data.json'),C=read('game-settings.json'),W=read('world-seed.json');
 assert.equal(C.hpMultiplier,10,'Current auto HP configuration');

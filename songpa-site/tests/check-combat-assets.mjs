@@ -58,4 +58,12 @@ for(const [id,name]of [[33,'contact'],[10,'slash'],[52,'fire'],[55,'water'],[22,
 assert.equal(effects.select({id:99999,power:30,class:3,type:10}).name,'fire');
 assert.equal(effects.select({id:99999,power:30,class:3}).dedicated,false);
 assert.equal(effects.select({id:45,power:0}).name,'status');
+for(const success of [false,true]){
+ assert.equal(effects.captureSample(0,from,to,success).phase,'throw');
+ const halfway=effects.captureSample(300,from,to,success);assert.equal(halfway.x,50);assert(halfway.y<from.y,'Ball travels in an arc');
+ assert.equal(effects.captureSample(900,from,to,success).enemyOpacity,0);
+ assert.equal(effects.captureSample(1400,from,to,success).phase,'shake');
+ const result=effects.captureSample(2100,from,to,success);assert.equal(result.phase,success?'caught':'escaped');assert.equal(result.enemyOpacity,success?0:1);
+ assert(effects.captureSample(2600,from,to,success).done);
+}
 console.log('PASS combat assets: 3 species, 45 unchanged PNGs/hashes, XML dimensions/timing/anchors, directions, explicit fallbacks/credits, file manifest, local paths/load retry and selected move effects');

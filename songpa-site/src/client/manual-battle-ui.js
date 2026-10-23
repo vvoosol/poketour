@@ -1,24 +1,24 @@
 'use strict';
 // PokéRogue's command/fight/info flow, adapted to Poketour's existing turn API.
 // No Phaser, third-party battle engine, RNG or reward calculation lives here.
-let manualMenu='command',manualBattleId=null,manualRefs=null,manualFramesStarted=false;
+let manualMenu='command',manualBattleId=null,manualRefs=null,manualFramesStarted=false,manualResult=null;
 function manualButton(text,fn,disabled=false){const b=button(text,fn,disabled);b.dataset.baseDisabled=String(disabled);return b;}
 function startManualFrames(){if(manualFramesStarted||!window.requestAnimationFrame)return;manualFramesStarted=true;let last=0;const frame=time=>{if(!document.hidden&&tab==='battle'&&manualRefs&&time-last>=32){last=time;updateManualBattle();}window.requestAnimationFrame(frame);};window.requestAnimationFrame(frame);}
 function manualOpen(menu){if(combatPlayback.playing||uiLocked())return;manualMenu=menu;manualRefs=null;renderBattle();}
 async function manualSubmit(command){
  if(combatPlayback.playing||uiLocked()||game.settings.auto)return false;
- const previous=manualMenu;manualMenu='command';manualRefs=null;
+ const previous=manualMenu;manualMenu='command';manualRefs=null;manualResult=null;
  const ok=await action('battle',command);
  if(!ok){manualMenu=previous;manualRefs=null;renderBattle();}return ok;
 }
 function manualMessage(b,p){
- const f=combatDisplay?.fact;if(!f)return game.settings.auto?'지도 자동전투 중입니다. 직접 개입하면 기술을 고를 수 있습니다.':`${p?.name||'포켓몬'}! 무엇을 할까?`;
+ const f=combatDisplay?.fact;if(!f)return manualResult?.battleId===b.id?manualResult.message:game.settings.auto?'지도 자동전투 중입니다. 직접 개입하면 기술을 고를 수 있습니다.':`${p?.name||'포켓몬'}! 무엇을 할까?`;
  const actors=[combatDisplay.scene.ally,combatDisplay.scene.enemy],actor=actors.find(x=>x?.uid===f.actor),target=actors.find(x=>x?.uid===f.target);
  if(f.type==='attack')return `${actor?.name||'포켓몬'}의 ${D.moves[f.move]?.name||'공격'}!${f.result==='miss'?' 그러나 빗나갔다!':f.result==='immune'?' 효과가 없다…':''}`;
  if(f.type==='hp')return f.after>f.before?`${target?.name||'포켓몬'}의 체력이 회복되었다!`:`${target?.name||'포켓몬'}에게 피해!`;
  if(f.type==='faint')return `${target?.name||'포켓몬'}은 쓰러졌다!`;
  if(f.type==='switch')return `가랏! ${target?.name||'포켓몬'}!`;
- if(f.type==='capture')return '몬스터볼을 던졌다!';
+ if(f.type==='capture')return combatDisplay.elapsed<1750?`${C.shop[f.ball]?.name||'몬스터볼'}을 던졌다!`:f.success?`${combatDisplay.scene.enemy.name}을(를) 잡았다!`:'볼에서 나왔다! 잡히지 않았다.';
  if(f.type==='end')return f.message||'전투가 끝났다!';
  if(f.type==='item')return `${C.shop[f.item]?.name||'도구'}를 사용했다!`;
  if(f.type==='blocked')return `${actor?.name||'포켓몬'}은 움직일 수 없다!`;
@@ -36,7 +36,7 @@ function manualBody(p,side){
  return {root,img,canvas,species:null};
 }
 function renderManualBattle(el,b,p){
- if(manualBattleId!==b.id){manualBattleId=b.id;manualMenu='command';manualRefs=null;}
+ if(manualBattleId!==b.id){manualBattleId=b.id;manualMenu='command';manualRefs=null;manualResult=null;}
  const key=[b.id,p?.uid,manualMenu,game.settings.auto].join(':');
  if(manualRefs?.key===key&&el.children[0]===manualRefs.root){updateManualBattle(b,p);return;}
  const root=node('div',undefined,'turn-battle'),header=node('div',undefined,'turn-header');
@@ -73,7 +73,7 @@ function renderManualBattle(el,b,p){
  }
  if(manualMenu!=='command'&&!game.settings.auto)choices.append(open('뒤로','command'));
  body.append(stage,controls);root.append(header,body);el.replaceChildren(root);
- manualRefs={key,root,stage,controls,choices,message,enemy,ally,enemyInfo,allyInfo,fx,modeButton,fainted:new Map()};updateManualBattle(b,p);startManualFrames();
+ manualRefs={key,root,stage,controls,choices,message,enemy,ally,enemyInfo,allyInfo,fx,modeButton,fainted:new Map(),captured:false};updateManualBattle(b,p);startManualFrames();
 }
 function updateManualBattle(b=displayBattle(),p=displayAlly()||game.player.party.find(x=>x.uid===b?.active)){
  const r=manualRefs;if(!r||!b)return;
@@ -91,6 +91,8 @@ function updateManualBattle(b=displayBattle(),p=displayAlly()||game.player.party
   if(f&&!f.auto){if(f.type==='attack'&&f.actor===model.uid){offset=PoketourMoveEffects.sample(move,elapsed,{x:0,y:0},{x:side==='ally'?100:-100,y:side==='ally'?-30:30},f.result).offset;}
    if(f.type==='attack'&&f.target===model.uid&&f.result==='hit'&&elapsed>=(combatDisplay.hitAt||300))opacity=Math.floor(elapsed/60)%2?.4:1;
    if(f.type==='faint'&&f.target===model.uid){const progress=Math.min(1,elapsed/400);r.fainted.set(model.uid,progress);opacity=1-progress;offset.y=elapsed/14;}else if(r.fainted.has(model.uid))opacity=0;
+   if(side==='enemy'&&f.type==='capture'){opacity=PoketourMoveEffects.captureSample(elapsed,{x:0,y:0},{x:0,y:0},f.success).enemyOpacity;if(f.success&&elapsed>=1750)r.captured=true;}
+   if(side==='enemy'&&r.captured)opacity=0;
   }
   body.root.style.transform=`translate(${offset.x}px,${offset.y}px)`;body.root.style.opacity=String(opacity);
  }
@@ -98,5 +100,6 @@ function updateManualBattle(b=displayBattle(),p=displayAlly()||game.player.party
  const locked=combatPlayback.playing||uiLocked();for(const command of r.choices.children){if(command.tagName==='BUTTON'){command.dataset.baseDisabled??=String(!!command.disabled);command.disabled=locked||command.dataset.baseDisabled==='true';}else for(const child of command.children||[])if(child.tagName==='BUTTON'){child.dataset.baseDisabled??=String(!!child.disabled);child.disabled=locked||child.dataset.baseDisabled==='true';}}
  const ctx=r.fx.getContext?.('2d');if(ctx){const w=r.stage.clientWidth||330,h=r.stage.clientHeight||300;r.fx.width=w;r.fx.height=h;const f=combatDisplay?.fact;
   if(f&&!f.auto&&f.type==='attack'){const from=f.actor===p?.uid?{x:w*.23,y:h*.75}:{x:w*.8,y:h*.34},to=f.actor===p?.uid?{x:w*.8,y:h*.34}:{x:w*.23,y:h*.75};PoketourMoveEffects.draw(ctx,D.moves[f.move]||{},combatDisplay.elapsed,from,to,f.result);}
+  if(f&&!f.auto&&f.type==='capture')PoketourMoveEffects.drawCapture(ctx,combatDisplay.elapsed,{x:w*.23,y:h*.75},{x:w*.8,y:h*.34},f.success,f.ball);
  }
 }

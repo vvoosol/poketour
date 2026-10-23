@@ -37,6 +37,8 @@ for(const [index,id]of [749,318,940].entries()){
  assert.equal(nodes.get('wallet').children[0],stableWallet);
  vm.runInContext(`
  const manualTime=now();E.apply(game,'settings',{auto:false},manualTime);
+ E.apply(game,'settings',{auto:true},manualTime);showTab('battle');if(tab!=='map'||!$('panel-battle').hidden)throw Error('Automatic combat must stay on the map');
+ E.apply(game,'settings',{auto:false},manualTime);showTab('battle');if(tab!=='battle')throw Error('Manual battle must remain accessible');
  game.fieldWilds=[{id:'ui-manual',speciesId:19,level:5,habitat:'urban',place:'검증',coord:game.game.coord,expiresAt:manualTime+100000}];
  E.apply(game,'pursue-wild',{id:'ui-manual'},manualTime);renderBattle();
  const flatten=e=>[e,...e.children.flatMap(flatten)];
@@ -59,6 +61,18 @@ for(const [index,id]of [749,318,940].entries()){
  game.player.party[0].hp=oldHp;updateManualBattle();
  const sceneAlly=JSON.parse(JSON.stringify(game.player.party[0]));delete sceneAlly.xp;updateManualBattle(game.battle,sceneAlly);
  if(!Number.isFinite(manualRefs.allyInfo.exp.value))throw Error('Playback snapshot without XP produced a non-finite progress value');
+ const captureScene={ally:sceneAlly,enemy:game.battle.enemy};
+ for(const success of [false,true]){
+  combatDisplay={fact:{type:'capture',auto:false,success,ball:'poke-ball',target:captureScene.enemy.uid},scene:captureScene,elapsed:1000};updateManualBattle();
+  if(manualRefs.enemy.root.style.opacity!=='0'||!manualRefs.message.textContent.includes('던졌다'))throw Error('Capture absorption or throw message missing');
+  combatDisplay.elapsed=2100;updateManualBattle();
+  if(!manualRefs.message.textContent.includes(success?'잡았다':'잡히지 않았다'))throw Error('Capture result message missing');
+  if(manualRefs.enemy.root.style.opacity!==(success?'0':'1'))throw Error('Capture success/failure visibility mismatch');
+ }
+ combatDisplay=null;
+ const savedBattle=game.battle;game.battle=null;manualResult={battleId:savedBattle.id,message:'꼬렛 포획 성공! 잡았다!'};renderBattle();
+ if(!flatten($('panel-battle')).some(e=>e.textContent==='꼬렛 포획 성공! 잡았다!'))throw Error('Capture result must remain visible after the battle ends');
+ game.battle=savedBattle;manualResult=null;
  const health=node('div');setMapHealth(health,25,100,'검증');if(health.children[0].value!==25||health.children[1].textContent!=='25/100')throw Error('Map health display');
  `,context);control.unauth=true;await assert.rejects(vm.runInContext('loadSave()',context));const login=nodes.get('save-status').children.find(x=>x.tagName==='A');assert(login,'401 shows a reload link');assert.equal(login.href,'./');assert.equal(login.target,'_top');console.log('PASS actual UI callbacks + Worker persistence: starter',id,'team, settings, dex, battle, search, storage recovery');
 }
