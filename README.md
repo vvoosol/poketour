@@ -10,7 +10,7 @@
 
 ## GitHub에 직접 업로드
 
-게시할 폴더에 최상위 **`index.html`과 `assets/` 전체를 함께** 올립니다. 폴더 구조를 유지하세요. `index.html`만 올리면 작동하지 않습니다. GitHub Pages 주소로 공유합니다. 기존 공유 주소는 https://vvoosol.github.io/poketour-play/ 입니다. 최신 원본과 실행 자산은 비공개 vvoosol/poketour main에 업로드했습니다. 현재 요금제는 이 비공개 저장소의 Pages를 지원하지 않아, 공개 실행 저장소 사용 또는 저장소 공개 전환에 대한 사용자 선택을 기다립니다.
+게시할 폴더에 최상위 **`index.html`과 `assets/` 전체를 함께** 올립니다. 폴더 구조를 유지하세요. `index.html`만 올리면 작동하지 않습니다. GitHub Pages 주소로 공유합니다. 이전 공유 주소는 https://vvoosol.github.io/poketour-play/ 입니다. 사용자의 선택에 따라 vvoosol/poketour를 공개로 전환하고 Pages를 활성화했습니다. 새 게임 주소는 https://vvoosol.github.io/poketour/ 입니다. main의 index.html/assets 변경을 GitHub Actions가 자동 배포합니다.
 
 `songpa-site`는 개발 원본입니다. 실행에 의존성 폴더, 로컬 DB나 서버 번들은 필요하지 않습니다. 업로드·배포는 사용자의 명시적 요청 범위에서 수행합니다.
 

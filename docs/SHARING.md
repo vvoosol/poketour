@@ -1,3 +1,9 @@
+# 현재 공유 주소
+
+https://vvoosol.github.io/poketour/
+
+2026-10-23 사용자가 저장소 전체 공개를 선택하여 vvoosol/poketour를 Public으로 전환하고 GitHub Pages(workflow)를 활성화했다. .github/workflows/pages.yml이 main의 최상위 index.html과 assets/만 사이트로 게시한다. 원본/문서는 공개 저장소에서 관리하지만 Pages 아티팩트에는 서버 번들·DB·의존성을 포함하지 않는다. 아래의 비공개 제한 및 poketour-play 기록은 전환 이전 기록이다.
+
 # 최신 로컬 개발 방식
 
 2026-10-23 최신 사용자 요청으로 vvoosol/poketour main에 소스와 index.html/assets 전체를 업로드했다. 이전 원격 업로드 이력도 병합해 보존했다. 빌드·전체 테스트 통과 및 GitHub 파일 존재 확인을 완료했다. 비공개 저장소 Pages 활성화는 현재 요금제 미지원(HTTP 422)으로 거절되었다. 저장소 비공개는 유지했으며 기존 공개 poketour-play에 최신 실행 파일을 배포할지 사용자 선택을 기다린다. 아래 공개 링크 검증 기록은 과거 배포에 대한 기록이다.
