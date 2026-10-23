@@ -149,3 +149,5 @@
 - 뒷모습은 확보된 PMDCollab 3종의 북쪽 방향이며 전투 전용 본가 그림은 아니다. 그 외는 정면 대체다. 전체 본가 엔진/기술/특성을 이식한 것은 아니며 상세 범위는 COMBAT_IMPLEMENTATION.md에 기록했다.
 - 최상위 index.html/assets 갱신 완료. GitHub 업로드는 사용자가 직접 한다. 시각 기록: screenshots/manual-battle-command-landscape.jpg, screenshots/manual-battle-moves-landscape.jpg.
 최종 실제 전투는 마지막 진흙뿌리기→상대 기절/종료→자금 2,500→2,540 및 전투 대기 화면 복귀까지 확인했다. 수정 이후 새 콘솔 오류는 없었다.
+
+2026-10-23 사용자 명시 요청에 따라 원격 사용자 업로드 이력을 병합하여 최신 소스·index.html/assets를 vvoosol/poketour main에 업로드했다(7233b9d). 비공개 유지, 빌드 및 전체 테스트 통과. Pages는 요금제 미지원 HTTP 422로 거절되어 공개 실행 저장소 사용/전체 공개 전환 선택 대기 중이다.
