@@ -31,3 +31,8 @@ https://vvoosol.github.io/poketour/
 - 전체 자동 검사와 IndexedDB 저장/백업/복원 검사를 통과했다. 실제 휴대폰 GPS·터치 검증은 별도다.
 - 최종 실행 코드 원본 커밋: `daaf8bde9edf938b91259f1c32841db690688521`.
 - 실행 파일 저장소 커밋: `6df5e41aabe93e8659a99350093d85ba2643f2b3`.
+
+## 공개 전환 후 확인 (2026-10-23)
+
+Actions 배포 성공. https://vvoosol.github.io/poketour/ 와 주요 실행 자산 HTTP 200 확인. 실제 브라우저에서 지도·메뉴·기존 저장을 로딩했으며 콘솔 오류가 없었다. 기존 진행도는 변경하지 않았다. 새 공유 주소는 poketour/이며 poketour-play/는 이전 주소다.
+
