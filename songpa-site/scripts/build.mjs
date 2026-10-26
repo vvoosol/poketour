@@ -4,6 +4,7 @@ import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { build as bundle } from 'esbuild';
 import { projectRoot, projectPath, entryHtml } from './paths.mjs';
+import { syncUploadAssets } from './sync-upload-assets.mjs';
 
 export async function build() {
   // Only the generated output is removed. Authoring files live outside dist.
@@ -15,7 +16,8 @@ export async function build() {
   fs.cpSync(projectPath('public'), projectPath('dist/client'), { recursive: true });
   fs.copyFileSync(projectPath('source-data/PokeAPI-LICENSE.md'),projectPath('dist/client/PokeAPI-LICENSE.md'));
   fs.cpSync(projectPath('src/client'), projectPath('dist/client'), { recursive: true });
-  fs.cpSync(projectPath('src/platform'), projectPath('dist/client/platform'), { recursive: true });
+  fs.mkdirSync(projectPath('dist/client/platform'), {recursive:true});
+  for(const name of ['browser.js','browser-store.mjs'])fs.copyFileSync(projectPath('src/platform',name),projectPath('dist/client/platform',name));
   fs.cpSync(projectPath('src/shared'), projectPath('dist/client/shared'), { recursive: true });
   const html = fs.readFileSync(entryHtml, 'utf8').replace(/  <base href="\.\/assets\/" data-poketour-assets>\r?\n/, '');
   fs.writeFileSync(projectPath('dist/client/index.html'), html);
@@ -37,7 +39,7 @@ export async function build() {
   await bundle({
     entryPoints: [projectPath('src/platform/file-runtime.mjs')],
     outfile: projectPath('dist/client/file-mode.js'),
-    bundle: true, format: 'iife', platform: 'browser', target: 'es2022',
+    bundle: true, minify: true, format: 'iife', platform: 'browser', target: 'es2022',
     define: { 'import.meta.url': 'document.baseURI' },
     banner: { js: 'window.POKETOUR_FILE_DATA=' + JSON.stringify(fileData) + ';' },
   });
@@ -73,10 +75,7 @@ export default createWorker({pokemonData,settings,seed,evidence,loadFootGraph:()
   };
   fs.writeFileSync(projectPath('dist/build-report.json'), JSON.stringify(report, null, 2));
   // Keep the repository root directly publishable without a hosting build step.
-  const uploadAssets = path.resolve(path.dirname(entryHtml), 'assets');
-  if (path.dirname(uploadAssets) !== path.dirname(entryHtml) || path.basename(uploadAssets) !== 'assets') throw Error('Unsafe upload path');
-  fs.mkdirSync(uploadAssets, { recursive: true });
-  fs.cpSync(projectPath('dist/client'), uploadAssets, { recursive: true });
+  syncUploadAssets();
   console.log(`Built ${report.clientFiles} client files; server JS ${report.serverJavaScriptBytes} bytes (${report.serverJavaScriptGzipBytes} bytes gzip, per-file sum).`);
   return report;
 }

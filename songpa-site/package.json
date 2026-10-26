@@ -14,7 +14,7 @@
     "test:browser": "node tests/check-browser.mjs",
     "test:layout": "node tests/check-layout.mjs",
     "measure:balance": "node scripts/measure-balance.mjs",
-    "deploy:pages": "node scripts/publish-pages.mjs"
+    "deploy:pages": "gh workflow run pages.yml --repo vvoosol/poketour --ref main"
   },
   "devDependencies": {
     "drizzle-kit": "0.31.10",

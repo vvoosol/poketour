@@ -15,7 +15,7 @@ window.installSaveControls = function installSaveControls() {
       await Platform.reset({revision,requestId:crypto.randomUUID()});
       selectionVersion++;pendingBackup=null;
       $('backup-restore').hidden=true;$('backup-file').value='';
-      archivedLogs=[];logPage=null;renderedRevision=-1;plan=null;lastMapAttack=0;
+      archivedLogs=[];logPage=null;renderedRevision=-1;plan=null;
       selected=null;$('detail').hidden=true;teamView=null;
       boxView.query='';boxView.filter='all';boxView.sort='recent';boxView.limit=24;
       await loadSave();showTab('map');

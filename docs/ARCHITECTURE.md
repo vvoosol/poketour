@@ -25,11 +25,12 @@
 | `songpa-site/src/platform/browser-store.mjs` | IndexedDB·행동·기록·백업·복원 |
 | `songpa-site/public` | 정적 이미지·폰트·데이터 |
 | `songpa-site/dist/client` | GitHub Pages 배포 산출물 |
-| `songpa-site/scripts/publish-pages.mjs` | 검증된 산출물만 배포 저장소에 푸시 |
+| `.github/workflows/pages.yml` | main의 index.html/assets를 현재 저장소 Pages에 배포 |
+| `songpa-site/scripts/sync-upload-assets.mjs` | assets를 새 빌드와 일치시켜 구형 산출물 제거 |
 | `songpa-site/worker`, `scripts/local-*`, `dist/server` | 선택적 로컬 서버와 기존 엔진 회귀 검사 |
 | `docs/archive` | 사용을 중단한 호스팅·게임 규칙 기록 |
 
-빌드는 UI·공유 모듈·설정·캐시 데이터·라이선스를 배치하고 시설 seed와 보행 그래프를 생성합니다. 보행 그래프는 처음 경로를 계산할 때만 내려받아 캐시합니다. 모든 배포 경로는 상대 주소이므로 GitHub Pages의 `/poketour-play/` 하위에서도 동작합니다. `.nojekyll`은 정적 파일을 그대로 제공하도록 설정합니다.
+빌드는 UI·공유 모듈·설정·캐시 데이터·라이선스를 배치하고 시설 seed와 보행 그래프를 생성합니다. 보행 그래프는 처음 경로를 계산할 때만 내려받아 캐시합니다. 모든 배포 경로는 상대 주소이므로 GitHub Pages의 `/poketour/` 하위에서도 동작합니다. `.nojekyll`은 정적 파일을 그대로 제공하도록 설정합니다.
 
 ## 백업과 복원
 
@@ -37,9 +38,9 @@
 
 ## 배포 운영
 
-개발 원본은 비공개 `vvoosol/poketour`, 공개 실행 파일은 `vvoosol/poketour-play`로 나눕니다. 공개 저장소에는 API 서버·로컬 DB·비밀값·개발 CSV·내부 문서·원본 Git 이력을 올리지 않습니다. 공개 웹 실행에 필요한 엔진·이미지·게임 데이터는 공개 파일에 포함됩니다.
+사용자 선택에 따라 개발 원본과 실행 파일은 공개 `vvoosol/poketour`에서 관리합니다. Pages에는 최상위 index.html/assets만 게시하며 로컬 DB·비밀값·의존성은 저장소와 게시 대상에서 제외합니다. 이전 `poketour-play` 분리 배포는 사용하지 않습니다.
 
-최신 사용자 지시에 따라 에이전트는 로컬 개발·검증과 최상위 index.html 및 assets 갱신만 수행합니다. GitHub 업로드는 사용자가 직접 하며 자동 커밋·푸시·배포는 하지 않습니다. `publish-pages.mjs`는 이전 배포 경로의 도구로 보존하며 현재 작업에서는 실행하지 않습니다.
+에이전트는 사용자가 승인한 개발·검증·커밋·푸시·Pages 배포를 수행합니다. 기존 별도 저장소 게시 스크립트는 제거했습니다. `npm run deploy:pages`는 현재 저장소의 Pages 워크플로만 실행하며 빌드/푸시를 대신하지 않습니다.
 
 GitHub Pages는 정적 호스팅이므로 별도 API 런타임이나 D1 바인딩을 사용하지 않습니다. [GitHub Pages 공식 문서](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 

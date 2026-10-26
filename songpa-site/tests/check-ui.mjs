@@ -37,6 +37,17 @@ for(const [index,id]of [749,318,940].entries()){
   game.travel=null;game.battle={};renderArrivalActivity();if(!$('arrival-activity').hidden)throw Error('Activity icon visible during battle');
  }finally{game=saved;selected=oldSelected;action=oldAction;showTab('map');}
  })()`,context);
+ vm.runInContext(`{
+ const savedMap=map,savedTab=tab,originalCompanion=syncCompanion,originalWilds=syncFieldMarkers,originalRender=renderMapCombat,originalLabels=layoutMapLabels;
+ let scheduled,draws=0;
+ try{
+  map={isStyleLoaded:()=>true};tab='map';window.requestAnimationFrame=fn=>scheduled=fn;
+  syncCompanion=()=>draws++;syncFieldMarkers=()=>draws++;renderMapCombat=()=>draws++;layoutMapLabels=()=>{};
+  mapFramesStarted=false;startMapFrames();combatPlayback.current={};scheduled(1000);
+  if(draws!==0)throw Error('Idle RAF duplicated active combat rendering');
+  combatPlayback.current=null;scheduled(1100);if(draws!==3)throw Error('Idle map rendering did not resume after combat');
+ }finally{map=savedMap;tab=savedTab;syncCompanion=originalCompanion;syncFieldMarkers=originalWilds;renderMapCombat=originalRender;layoutMapLabels=originalLabels;delete window.requestAnimationFrame;mapFramesStarted=false;combatPlayback.current=null;}
+ }`,context);
  const stableWallet=nodes.get('wallet').children[0],stablePanel=nodes.get('panel-battle').children[0];
  const stableSearch=nodes.get('search-toggle').textContent,stableAuto=nodes.get('auto-toggle').textContent;
  control.pauseSync=true;const quiet=vm.runInContext("action('sync')",context);

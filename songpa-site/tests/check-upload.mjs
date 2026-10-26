@@ -4,13 +4,20 @@ import path from 'node:path';
 import { entryHtml, projectPath } from '../scripts/paths.mjs';
 import { createStaticAssets } from '../scripts/static-assets.mjs';
 import { startUploadPreview } from '../scripts/preview-upload.mjs';
+import { syncUploadAssets } from '../scripts/sync-upload-assets.mjs';
 
 const root = path.dirname(entryHtml);
 const assets = createStaticAssets(root);
 const html = fs.readFileSync(entryHtml, 'utf8');
+const stale=path.join(root,'assets','obsolete-build-fixture');
+fs.mkdirSync(stale,{recursive:true});fs.writeFileSync(path.join(stale,'unused.js'),'obsolete');
+syncUploadAssets();
+assert(!fs.existsSync(stale),'A clean upload cannot retain deleted build assets');
+assert.equal(fs.readFileSync(entryHtml,'utf8'),html,'Asset replacement preserves the authored root entry');
+assert(!fs.existsSync(path.join(root,'assets/platform/file-runtime.mjs')),'Build-only file runtime source is not published');
 assert.match(html, /<base href="\.\/assets\/" data-poketour-assets>/);
 // A project Pages URL must resolve to the same files as a root-domain URL.
-for (const prefix of ['/', '/poketour-play/']) {
+for (const prefix of ['/', '/poketour/']) {
   const base = new URL('./assets/', 'https://example.test' + prefix);
   for (const [, ref] of html.replace(/<base\b[^>]*>/, '').matchAll(/(?:src|href)="(\.\/[^"?]+)(?:\?[^" ]*)?"/g)) {
     const url = new URL(ref, base);

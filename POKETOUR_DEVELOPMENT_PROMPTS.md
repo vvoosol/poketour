@@ -1,8 +1,8 @@
 # Poketour 5단계 개발 지시
 
-공유·실행은 GitHub Pages와 저장소 루트 index.html을 기준으로 한다. 기존 GPT/Sites 호스팅·로그인 방식은 사용하지 않는다. 개발 원본은 비공개, 실행 파일 전용 저장소는 공개로 유지한다.
+공유·실행은 GitHub Pages와 저장소 루트 index.html을 기준으로 한다. 기존 GPT/Sites 호스팅·로그인 방식은 사용하지 않는다. 최신 사용자 선택에 따라 vvoosol/poketour는 공개 저장소이며 https://vvoosol.github.io/poketour/ 로 공유한다.
 
-공통: 기존 개체 UID·상태 version migration·엔진 규칙을 보존한다. 브라우저 저장의 원자성·requestId 재전송·다중 탭 revision 충돌을 검사한다. 구현 → 관련 검사 → 최상위 index.html과 assets 갱신 순서로 진행한다. GitHub 업로드는 사용자가 직접 하며 에이전트는 자동 커밋·푸시·배포하지 않는다. 실제 수행하지 않은 모바일 검증을 완료했다고 쓰지 않는다.
+공통: 기존 개체 UID·상태 version migration·엔진 규칙을 보존한다. 브라우저 저장의 원자성·requestId 재전송·다중 탭 revision 충돌을 검사한다. 구현 → 빌드 → 관련 검사 → 최상위 index.html과 assets 업로드 순서로 진행한다. 사용자가 승인한 GitHub 업로드는 에이전트가 수행하며 main의 실행 파일 변경은 Pages Actions로 배포한다. 실제 수행하지 않은 모바일 검증을 완료했다고 쓰지 않는다.
 
 ## 1단계 — 개발 구조
 

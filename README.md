@@ -34,3 +34,5 @@ npm test
 원본은 최상위 `index.html`과 `songpa-site/src/`, `songpa-site/public/`에 있습니다. 빌드는 `songpa-site/dist/`를 생성하고 최상위 `assets/`도 갱신합니다. 생성 파일을 직접 수정하지 않습니다. `dist/client/`도 별도의 완성된 정적 배포 폴더입니다.
 
 진행도는 이 브라우저의 IndexedDB에 저장됩니다. 다른 기기로 옮길 때 메뉴의 저장 파일 내보내기·복원을 사용하세요. 기존 서버 계정 저장은 자동 이전되지 않습니다. `npm run dev`·`npm run preview`는 서버 회귀 검사용이므로 정적 실행 확인에는 위 `로컬실행.cmd`를 사용합니다.
+
+정리 내용과 다음 개발 우선순위는 [최적화 검토](docs/OPTIMIZATION_REVIEW.md)에 정리했습니다.

@@ -131,7 +131,7 @@ globalThis.PoketourMapCombatView = class MapCombatView {
   }
   render({view=null,battleScene=null,move={},project,viewport,trainer=null,context=null,time=this.clock()}){
     const actors=[...this.actors.values()];const byUid=new Map();
-    for(const actor of actors){actor.point=this.point(actor,project,viewport);actor.point={x:Math.round(actor.point.x*1000)/1000,y:Math.round(actor.point.y*1000)/1000};actor.anchorPoint={...actor.point};actor.visualOffset={x:0,y:0};actor.onScreen=actor.point.x>=-24&&actor.point.y>=-24&&actor.point.x<=viewport.width+24&&actor.point.y<=viewport.height+24;byUid.set(actor.model.uid,actor);}
+    for(const actor of actors){actor.point=this.point(actor,project,viewport);actor.point={x:Math.round(actor.point.x*1000)/1000,y:Math.round(actor.point.y*1000)/1000};actor.anchorPoint={...actor.point};actor.onScreen=actor.point.x>=-24&&actor.point.y>=-24&&actor.point.x<=viewport.width+24&&actor.point.y<=viewport.height+24;byUid.set(actor.model.uid,actor);}
     this.arrange(actors,viewport,trainer,time);
     for(const actor of actors){
       const scene=view?.scene||battleScene,enemy=scene&&byUid.get(actor.role==='ally'?scene.enemy?.uid:scene.ally?.uid);

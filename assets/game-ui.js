@@ -51,11 +51,11 @@ function setMapHealth(el,hp,max,name){
  setText(el.children[1],`${Math.ceil(hp)}/${max}`);
  el.setAttribute('aria-label',`${name} 체력 ${Math.ceil(hp)}/${max}`);
 }
-let lastMapAttack=0,combatDisplay=null,queuedAuto=null,mapView=null,mapFramesStarted=false,presentedDamageId=null;
+let combatDisplay=null,queuedAuto=null,mapView=null,mapFramesStarted=false,presentedDamageId=null;
 const combatPlayback=new PoketourCombatPlayback({
  clock:now,
  present:playCombatEvent,
- onChange:player=>{if(!player.playing){combatDisplay=null;lastMapAttack=0;presentedDamageId=null;mapView?.reset();Promise.resolve().then(flushQueuedAuto);}renderGame();},
+ onChange:player=>{if(!player.playing){combatDisplay=null;presentedDamageId=null;mapView?.reset();Promise.resolve().then(flushQueuedAuto);}renderGame();},
  onError:error=>{console.error('Combat presentation failed',error);}
 });
 function flushQueuedAuto(){if(queuedAuto===null||combatPlayback.playing||busy||!ready)return;const auto=queuedAuto;queuedAuto=null;return action('settings',{auto});}
@@ -69,7 +69,7 @@ function getMapView(){
  return mapView;
 }
 function playCombatEvent(event,token){
- const fact=event.combat,auto=fact.auto,move=D.moves[fact.move]||{};
+ const fact=event.combat,move=D.moves[fact.move]||{};
  combatDisplay={id:event.id,fact,scene:JSON.parse(JSON.stringify(fact.scene)),elapsed:0};
  const target=[combatDisplay.scene.ally,combatDisplay.scene.enemy].find(p=>p?.uid===fact.target);
  const preAnimated=fact.type==='hp'&&event.id===presentedDamageId;
@@ -102,7 +102,7 @@ function renderMapCombat(){
 }
 function startMapFrames(){
  if(mapFramesStarted||!window.requestAnimationFrame)return;mapFramesStarted=true;let last=0,lastLabels=0;
- const frame=time=>{if(!document.hidden&&tab==='map'&&map?.isStyleLoaded()&&time-last>=32){last=time;syncCompanion();syncFieldMarkers();renderMapCombat();if(time-lastLabels>250){lastLabels=time;layoutMapLabels();}}window.requestAnimationFrame(frame);};
+ const frame=time=>{if(!document.hidden&&tab==='map'&&map?.isStyleLoaded()&&time-last>=32){last=time;if(!combatPlayback.playing){syncCompanion();syncFieldMarkers();renderMapCombat();}if(time-lastLabels>250){lastLabels=time;layoutMapLabels();}}window.requestAnimationFrame(frame);};
  window.requestAnimationFrame(frame);
 }
 // Coordinates are logical map pixels, independent of the outer canvas scale.
